@@ -1,100 +1,330 @@
-<div id="game-container" style="margin: 50px auto; max-width: 400px; position: relative;">
-    <h2 style="color: #ff8c00; font-size: 1.2rem; margin-bottom: 10px;">MOE DASH <span class="soon">v0.1 Alpha</span></h2>
-    <canvas id="gameCanvas" width="400" height="200" style="border: 2px solid #333; background: #111; border-radius: 10px; cursor: pointer;"></canvas>
-    <div id="game-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-        <p id="start-text" style="color: #fff; font-weight: bold; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 5px;">TAP TO START</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Racing Game - Pro Edition</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a); 
+            color: white; text-align: center; height: 100vh; display: flex; 
+            justify-content: center; align-items: center; overflow: hidden;
+        }
+        #game-container { width: 100%; max-width: 800px; padding: 10px; position: relative; }
+        h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 2px 2px 10px #000; }
+        
+        .menu-btn { 
+            display: block; width: 80%; margin: 15px auto; padding: 18px; 
+            font-size: 20px; cursor: pointer; background: #333; color: white; 
+            border: 2px solid #555; border-radius: 12px; transition: 0.3s; 
+        }
+        .menu-btn:hover:not(:disabled) { background: #555; border-color: white; transform: scale(1.02); }
+        .menu-btn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+
+        #settings-overlay, #level-menu, #game-screen { display: none; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 15px; border: 2px solid #444; }
+        
+        #in-game-overlay, #win-screen { 
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); border-radius: 15px; z-index: 100; 
+            flex-direction: column; justify-content: center; align-items: center; 
+        }
+
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        #game-screen { position: relative; padding: 0; width: 100%; overflow: hidden; border: 3px solid #555; border-radius: 15px; box-shadow: 0 0 30px #000; }
+        #gameCanvas { background: linear-gradient(to bottom, #1e90ff, #87ceeb); width: 100%; aspect-ratio: 16 / 9; display: block; }
+        
+        .game-ui { position: absolute; top: 15px; left: 15px; text-align: left; pointer-events: none; background: rgba(0,0,0,0.7); padding: 12px; border-radius: 8px; border-left: 5px solid #ffd700; z-index: 10; font-family: monospace; }
+        .game-ui b { color: #ffd700; font-size: 1.1rem; }
+        
+        .controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; z-index: 10; }
+        .ctrl-btn { width: 80px; height: 80px; background: rgba(0,0,0,0.8); border: 3px solid #fff; border-radius: 50%; color: white; font-weight: bold; cursor: pointer; user-select: none; touch-action: none; box-shadow: 0 6px 0 #000; transition: 0.1s; }
+        .ctrl-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #000; background: #444; }
+
+        .settings-icon { position: absolute; top: 15px; right: 15px; font-size: 25px; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #fff; color: white; z-index: 50; border-radius: 8px; padding: 5px; }
+
+        .footer, .version { position: fixed; bottom: 10px; font-size: 12px; color: #888; }
+        .footer { right: 10px; } .version { left: 10px; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop><source src="music.mp3" type="audio/mpeg"></audio>
+
+    <div id="game-container">
+        <div id="main-menu">
+            <h1>Racing Game</h1>
+            <button class="menu-btn" onclick="playClick(); showLevels()">Play</button>
+            <button class="menu-btn" onclick="playClick(); showSettings()">Settings & Style</button>
+        </div>
+
+        <div id="level-menu">
+            <h2>Select Level</h2>
+            <div class="grid-container">
+                <button class="menu-btn" onclick="playClick(); startLevel(1)">Level 1</button>
+                <button class="menu-btn" id="lvl2-btn" disabled onclick="playClick(); startLevel(2)">Level 2 🔒</button>
+                <button class="menu-btn" id="lvl3-btn" disabled>Level 3 🔒</button>
+                <button class="menu-btn" id="lvl4-btn" disabled>Level 4 🔒</button>
+            </div>
+            <button class="menu-btn" onclick="playClick(); hideLevels()" style="margin-top: 20px; background: #555;">Back</button>
+        </div>
+
+        <div id="settings-overlay">
+            <h2>Settings</h2>
+            <button class="menu-btn" id="musicBtn1" onclick="playClick(); toggleAudio()">Music: Off</button>
+            <button class="menu-btn" id="soundBtn1" onclick="playClick(); toggleSound()">Sound: Off</button>
+            <hr style="width: 80%; border: 0.5px solid #444;">
+            <h3>Car Color</h3>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button class="menu-btn" style="background: #e74c3c; width: 100px;" onclick="setCarColor('#e74c3c')">Red</button>
+                <button class="menu-btn" id="blue-car-btn" style="background: #3498db; width: 100px; opacity: 0.5;" disabled onclick="setCarColor('#3498db')">Blue 🔒</button>
+            </div>
+            <button class="menu-btn" onclick="playClick(); hideSettings()" style="margin-top: 10px;">Back</button>
+        </div>
+
+        <div id="game-screen">
+            <div class="game-ui">
+                🏁 <b>DIST:</b> <span id="scoreVal">0</span> / <span id="goalVal">0</span>m<br>
+                🪙 <b>COINS:</b> <span id="coinVal">0</span>
+            </div>
+            <button class="settings-icon" onclick="playClick(); toggleInGameSettings()">⚙️</button>
+            
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="controls">
+                <button class="ctrl-btn" id="brakeBtn">BRAKE</button>
+                <button class="ctrl-btn" id="gasBtn">GAS</button>
+            </div>
+            
+            <div id="in-game-overlay">
+                <h2>Pause</h2>
+                <button class="menu-btn" id="musicBtn2" onclick="playClick(); toggleAudio()">Music: Off</button>
+                <button class="menu-btn" id="soundBtn2" onclick="playClick(); toggleSound()">Sound: Off</button>
+                <button class="menu-btn" onclick="playClick(); toggleInGameSettings()" style="background: #444;">Resume</button>
+                <button class="menu-btn" onclick="playClick(); backToMenu()" style="background: #a00;">Quit Game</button>
+            </div>
+
+            <div id="win-screen">
+                <h2 style="color: #ffd700; font-size: 2.5rem;">LEVEL DONE!</h2>
+                <p id="finalStats" style="font-size: 1.2rem;">Coins: 0</p>
+                <button class="menu-btn" onclick="playClick(); goToLevelMenu()" style="background: #27ae60;">Go to Level Selection</button>
+            </div>
+        </div>
     </div>
-    <p id="score-text" style="margin-top: 10px; color: #888;">Score: 0</p>
-</div>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreText = document.getElementById('score-text');
-    const startText = document.getElementById('start-text');
+    <div class="version">Version: 1.14</div>
+    <div class="footer">Made by MOE 2026</div>
 
-    let gameActive = false;
-    let score = 0;
-    let player = { x: 50, y: 160, w: 30, h: 30, dy: 0, jumpPower: -10, gravity: 0.6, grounded: true };
-    let obstacles = [];
-    let gameSpeed = 5;
+    <script>
+        const audio = document.getElementById("bgMusic");
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        let soundEnabled = false;
+        let gameActive = false;
+        let currentLevel = 1;
+        let unlockedLevel = 1;
+        let carColor = "#e74c3c";
+        
+        // Spiel Variablen
+        let carY = 0, carVY = 0, carX = 120;
+        let worldX = 0, speed = 0, coins = 0;
+        let isGas = false, isBrake = false;
+        let coinsList = [];
+        let finishLine = 8000;
 
-    function drawPlayer() {
-        ctx.fillStyle = '#ff8c00'; // Dein Orange
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ff8c00';
-        ctx.fillRect(player.x, player.y, player.w, player.h);
-        ctx.shadowBlur = 0;
-    }
+        // Steuerung
+        const setupControl = (btn, startFn, endFn) => {
+            btn = document.getElementById(btn);
+            btn.onmousedown = startFn; btn.onmouseup = endFn;
+            btn.ontouchstart = (e) => { e.preventDefault(); startFn(); };
+            btn.ontouchend = endFn;
+        };
+        setupControl("gasBtn", () => isGas = true, () => isGas = false);
+        setupControl("brakeBtn", () => isBrake = true, () => isBrake = false);
 
-    function createObstacle() {
-        if (Math.random() < 0.02) {
-            obstacles.push({ x: 400, y: 165, w: 20, h: 35 });
-        }
-    }
-
-    function drawObstacles() {
-        ctx.fillStyle = '#fff';
-        obstacles.forEach((obs, index) => {
-            obs.x -= gameSpeed;
-            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-
-            // Collision Detection
-            if (player.x < obs.x + obs.w && player.x + player.w > obs.x &&
-                player.y < obs.y + obs.h && player.y + player.h > obs.y) {
-                gameOver();
-            }
-
-            if (obs.x + obs.w < 0) {
-                obstacles.splice(index, 1);
-                score++;
-                scoreText.innerText = "Score: " + score;
-            }
-        });
-    }
-
-    function update() {
-        if (!gameActive) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Ground Line
-        ctx.strokeStyle = '#333';
-        ctx.beginPath(); ctx.moveTo(0, 195); ctx.lineTo(400, 195); ctx.stroke();
-
-        // Player Physics
-        if (!player.grounded) {
-            player.dy += player.gravity;
-            player.y += player.dy;
-        }
-        if (player.y >= 165) {
-            player.y = 165;
-            player.dy = 0;
-            player.grounded = true;
+        function playClick() {
+            if (!soundEnabled) return;
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine"; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        drawPlayer();
-        createObstacle();
-        drawObstacles();
-        requestAnimationFrame(update);
-    }
+        function showLevels() { document.getElementById('main-menu').style.display = 'none'; document.getElementById('level-menu').style.display = 'block'; }
+        function hideLevels() { document.getElementById('level-menu').style.display = 'none'; document.getElementById('main-menu').style.display = 'block'; }
+        function showSettings() { document.getElementById('main-menu').style.display = 'none'; document.getElementById('settings-overlay').style.display = 'block'; }
+        function hideSettings() { document.getElementById('settings-overlay').style.display = 'none'; document.getElementById('main-menu').style.display = 'block'; }
 
-    function gameOver() {
-        gameActive = false;
-        startText.innerText = "GAME OVER - TAP TO RESTART";
-        startText.style.display = "block";
-        obstacles = [];
-        score = 0;
-    }
+        function setCarColor(color) { carColor = color; playClick(); }
 
-    canvas.addEventListener('click', () => {
-        if (!gameActive) {
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            finishLine = lvl === 1 ? 8000 : 15000; // Strecke wird länger
+            document.getElementById('goalVal').innerText = Math.floor(finishLine/10);
+            document.getElementById('level-menu').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('win-screen').style.display = 'none';
+            resetGame();
             gameActive = true;
-            startText.style.display = "none";
-            scoreText.innerText = "Score: 0";
-            update();
-        } else if (player.grounded) {
-            player.dy = player.jumpPower;
-            player.grounded = false;
+            requestAnimationFrame(gameLoop);
         }
-    });
-</script>
+
+        function resetGame() {
+            carY = 50; carVY = 0; worldX = 0; speed = 0; coins = 0;
+            coinsList = [];
+            let spacing = currentLevel === 1 ? 600 : 450;
+            for(let i=1; i<25; i++) { coinsList.push({x: i * spacing, collected: false}); }
+        }
+
+        function getGroundHeight(x) {
+            let groundBase = canvas.height * 0.78;
+            // Level 2 hat extremere Hügel
+            let multi = currentLevel === 1 ? 1 : 1.5;
+            let hillHeight = Math.sin((x + worldX) * 0.005) * (30 * multi) + Math.cos((x + worldX) * 0.002) * (20 * multi);
+            return groundBase + hillHeight;
+        }
+
+        function toggleInGameSettings() {
+            const overlay = document.getElementById('in-game-overlay');
+            if (overlay.style.display === 'flex') { overlay.style.display = 'none'; gameActive = true; requestAnimationFrame(gameLoop); } 
+            else { overlay.style.display = 'flex'; gameActive = false; }
+        }
+
+        function backToMenu() { gameActive = false; document.getElementById('game-screen').style.display = 'none'; document.getElementById('main-menu').style.display = 'block'; }
+        function goToLevelMenu() { gameActive = false; document.getElementById('game-screen').style.display = 'none'; document.getElementById('level-menu').style.display = 'block'; }
+
+        function drawCar(y, angle) {
+            ctx.save();
+            ctx.translate(carX + 25, y + 10);
+            ctx.rotate(angle * 0.25);
+
+            // Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            ctx.fillRect(-20, 15, 50, 5);
+
+            // Body
+            ctx.fillStyle = carColor; 
+            ctx.beginPath();
+            ctx.roundRect(-30, -12, 60, 18, 5);
+            ctx.fill();
+            
+            // Cockpit
+            ctx.fillStyle = "#222";
+            ctx.beginPath();
+            ctx.roundRect(-10, -25, 30, 15, 5);
+            ctx.fill();
+            ctx.fillStyle = "#87ceeb"; // Window
+            ctx.fillRect(-5, -22, 20, 10);
+
+            // Spoiler & Details
+            ctx.fillStyle = "#111";
+            ctx.fillRect(-35, -18, 15, 5); // Spoiler
+            ctx.fillStyle = "yellow"; ctx.fillRect(25, -5, 5, 5); // Headlight
+
+            // Wheels
+            ctx.fillStyle = "#111";
+            ctx.beginPath(); ctx.arc(-18, 12, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(22, 12, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#666"; // Rim
+            ctx.beginPath(); ctx.arc(-18, 12, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(22, 12, 4, 0, Math.PI * 2); ctx.fill();
+            
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let currentGround = getGroundHeight(carX);
+            if (carY < currentGround - 25) { carVY += 0.8; } 
+            else { carVY = 0; carY = currentGround - 25; }
+            carY += carVY;
+
+            if (isGas) speed += 0.18;
+            else if (isBrake) speed -= 0.5;
+            else speed *= 0.985; 
+            
+            speed = Math.max(0, Math.min(speed, 14));
+            worldX += speed;
+
+            document.getElementById("scoreVal").innerText = Math.floor(worldX/10);
+            document.getElementById("coinVal").innerText = coins;
+
+            // Sky Mountains
+            ctx.fillStyle = "#5d8aa8";
+            for(let i=0; i<3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i*400 - (worldX*0.1)%400, canvas.height);
+                ctx.lineTo(i*400+200 - (worldX*0.1)%400, canvas.height-150);
+                ctx.lineTo(i*400+400 - (worldX*0.1)%400, canvas.height);
+                ctx.fill();
+            }
+
+            // Ground
+            ctx.fillStyle = "#1e8449";
+            ctx.beginPath(); ctx.moveTo(0, canvas.height);
+            for(let i=0; i<=canvas.width; i+=10) { ctx.lineTo(i, getGroundHeight(i)); }
+            ctx.lineTo(canvas.width, canvas.height); ctx.fill();
+            ctx.fillStyle = "#145a32"; // Dirt layer
+            ctx.fillRect(0, canvas.height * 0.85, canvas.width, canvas.height);
+
+            // Coins
+            coinsList.forEach(c => {
+                let sX = c.x - worldX;
+                if (!c.collected && sX > -50 && sX < canvas.width) {
+                    ctx.fillStyle = "#f1c40f"; ctx.beginPath();
+                    ctx.arc(sX, getGroundHeight(sX) - 50, 13, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = "#b7950b"; ctx.lineWidth = 3; ctx.stroke();
+                    if (Math.abs(sX - carX) < 45 && Math.abs((getGroundHeight(sX)-50) - carY) < 45) {
+                        c.collected = true; coins++; playClick();
+                    }
+                }
+            });
+
+            // Finish
+            let fX = finishLine - worldX;
+            if (fX < canvas.width) {
+                ctx.fillStyle = "#eee"; ctx.fillRect(fX, getGroundHeight(fX) - 120, 8, 120);
+                ctx.fillStyle = "red"; ctx.fillRect(fX + 8, getGroundHeight(fX) - 120, 45, 30);
+                if (fX <= carX) {
+                    gameActive = false;
+                    if (unlockedLevel === 1) {
+                        unlockedLevel = 2;
+                        document.getElementById('lvl2-btn').disabled = false;
+                        document.getElementById('lvl2-btn').innerText = "Level 2";
+                        document.getElementById('blue-car-btn').disabled = false;
+                        document.getElementById('blue-car-btn').style.opacity = "1";
+                        document.getElementById('blue-car-btn').innerText = "Blue";
+                    }
+                    document.getElementById('win-screen').style.display = 'flex';
+                    document.getElementById('finalStats').innerText = `Coins collected: ${coins}`;
+                }
+            }
+
+            let angle = (getGroundHeight(carX + 15) - currentGround) / 15;
+            drawCar(carY, angle);
+            requestAnimationFrame(gameLoop);
+        }
+
+        function toggleAudio() {
+            const b1 = document.getElementById("musicBtn1"), b2 = document.getElementById("musicBtn2");
+            if (audio.paused) { audio.play().catch(e=>{}); b1.innerText = "Music: On"; b2.innerText = "Music: On"; }
+            else { audio.pause(); b1.innerText = "Music: Off"; b2.innerText = "Music: Off"; }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const b1 = document.getElementById("soundBtn1"), b2 = document.getElementById("soundBtn2");
+            let t = soundEnabled ? "Sound: On" : "Sound: Off";
+            b1.innerText = t; b2.innerText = t;
+        }
+    </script>
+</body>
+</html>
