@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON CYBER DASH - MOI Labs</title>
+    <title>NEON CYBER DASH - moe Labs</title>
     <style>
         :root { --neon: #00f2ff; --pink: #ff007f; --bg: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }
@@ -20,7 +20,6 @@
         }
         canvas { width: 100%; height: 100%; display: block; }
         
-        /* UI Elements */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center;
@@ -37,7 +36,6 @@
         .stats { position: absolute; top: 10px; left: 20px; text-align: left; pointer-events: none; }
         .stats b { color: var(--neon); font-size: 1.2rem; }
 
-        /* BRANDING */
         .footer-branding {
             position: absolute; bottom: 5px; width: 100%;
             display: flex; justify-content: space-between; padding: 0 15px;
@@ -62,7 +60,7 @@
     <canvas id="ctx"></canvas>
 
     <div class="footer-branding">
-        <span>Made by MOI 2026</span>
+        <span>Made by moe 2026</span>
         <span>v1.0</span>
     </div>
 </div>
@@ -78,7 +76,6 @@ let score = 0;
 let gameSpeed = 5;
 let frame = 0;
 
-// Player Object
 const player = {
     x: 80, y: 0, w: 30, h: 30,
     dy: 0, jumpForce: -12, gravity: 0.6,
@@ -96,7 +93,6 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Input
 function doJump() {
     if (player.grounded) {
         player.dy = player.jumpForce;
@@ -129,7 +125,6 @@ function startGame() {
 function update() {
     if(!gameActive) return;
 
-    // Physics
     player.dy += player.gravity;
     player.y += player.dy;
 
@@ -140,15 +135,12 @@ function update() {
         player.grounded = true;
     }
 
-    // Spawn Obstacles
     if (frame % 100 === 0) {
         obstacles.push({ x: canvas.width, w: 40, h: 40 + Math.random() * 60, type: 'danger' });
     }
 
-    // Move Objects
     obstacles.forEach((obs, index) => {
         obs.x -= gameSpeed;
-        // Collision
         if (player.x < obs.x + obs.w && player.x + player.w > obs.x &&
             player.y < (canvas.height - 80) && player.y + player.h > (canvas.height - 80 - obs.h)) {
             gameOver();
@@ -173,7 +165,6 @@ function draw() {
     scp.fillStyle = '#000';
     scp.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Floor
     scp.strokeStyle = varColor('--neon');
     scp.lineWidth = 4;
     scp.beginPath();
@@ -181,26 +172,22 @@ function draw() {
     scp.lineTo(canvas.width, canvas.height - 80);
     scp.stroke();
 
-    // Grid Effect
     scp.strokeStyle = '#111';
     for(let i=0; i<canvas.width; i+=40) {
         scp.beginPath(); scp.moveTo(i - (frame % 40), canvas.height - 80);
         scp.lineTo(i - (frame % 40) - 100, canvas.height); scp.stroke();
     }
 
-    // Draw Player
     scp.fillStyle = player.color;
     scp.shadowBlur = 15; scp.shadowColor = player.color;
     scp.fillRect(player.x, player.y, player.w, player.h);
 
-    // Draw Obstacles
     scp.fillStyle = '#ff007f';
     scp.shadowColor = '#ff007f';
     obstacles.forEach(obs => {
         scp.fillRect(obs.x, canvas.height - 80 - obs.h, obs.w, obs.h);
     });
 
-    // Draw Particles
     particles.forEach(p => {
         scp.globalAlpha = p.life;
         scp.fillStyle = p.color;
