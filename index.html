@@ -3,66 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON CYBER DASH - moe Labs</title>
+    <title>NEON CYBER DASH PRO - moe Labs</title>
     <style>
-        :root { --neon: #00f2ff; --pink: #ff007f; --bg: #050505; }
-        * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }
+        :root { --neon: #00f2ff; --pink: #ff007f; --bg: #030303; }
+        * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; user-select: none; }
         body { 
             background-color: var(--bg); 
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', 'Courier New', monospace;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; color: white;
         }
         #game-wrapper {
             position: relative; width: 100%; max-width: 900px;
-            aspect-ratio: 16/9; border: 2px solid var(--neon);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); background: #000;
+            aspect-ratio: 16/9; border: 3px solid #111;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); background: #000;
+            border-radius: 10px;
         }
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas { width: 100%; height: 100%; display: block; border-radius: 8px; }
         
+        /* Scanline Effect */
+        #game-wrapper::after {
+            content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 5;
+        }
+
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; background: rgba(0,0,0,0.8); z-index: 10;
+            align-items: center; background: rgba(0,0,0,0.85); z-index: 20;
+            backdrop-filter: blur(5px);
         }
-        h1 { font-size: 3rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin-bottom: 20px; }
-        .btn {
-            padding: 15px 40px; font-size: 1.5rem; background: transparent;
-            border: 2px solid var(--pink); color: var(--pink); cursor: pointer;
-            transition: 0.3s; text-transform: uppercase; letter-spacing: 3px;
-        }
-        .btn:hover { background: var(--pink); color: white; box-shadow: 0 0 20px var(--pink); }
+        h1 { font-size: 3.5rem; color: var(--neon); text-shadow: 0 0 20px var(--neon); margin-bottom: 10px; font-style: italic; }
         
-        .stats { position: absolute; top: 10px; left: 20px; text-align: left; pointer-events: none; }
-        .stats b { color: var(--neon); font-size: 1.2rem; }
-
-        .footer-branding {
-            position: absolute; bottom: 5px; width: 100%;
-            display: flex; justify-content: space-between; padding: 0 15px;
-            font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 1px;
+        .menu-content { text-align: center; width: 80%; }
+        .btn {
+            padding: 12px 35px; font-size: 1.2rem; background: transparent;
+            border: 2px solid var(--neon); color: var(--neon); cursor: pointer;
+            transition: 0.3s; text-transform: uppercase; letter-spacing: 3px;
+            margin: 10px; border-radius: 5px;
         }
+        .btn:hover { background: var(--neon); color: black; box-shadow: 0 0 30px var(--neon); }
+        .btn-pink { border-color: var(--pink); color: var(--pink); }
+        .btn-pink:hover { background: var(--pink); color: white; box-shadow: 0 0 30px var(--pink); }
+
+        .stats { position: absolute; top: 20px; left: 25px; text-align: left; pointer-events: none; z-index: 10; line-height: 1.4; }
+        .stats div { font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        .stats b { color: var(--neon); font-size: 1.4rem; text-shadow: 0 0 10px var(--neon); }
+
+        .skin-select { margin-top: 20px; display: flex; gap: 15px; justify-content: center; }
+        .skin-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .skin-dot:hover { transform: scale(1.2); }
+        .skin-dot.active { border-color: white; transform: scale(1.2); box-shadow: 0 0 15px white; }
+
+        /* BRANDING NEW POSITION */
+        .branding {
+            position: absolute; bottom: 15px; right: 20px;
+            font-size: 11px; color: rgba(255,255,255,0.2);
+            text-transform: uppercase; letter-spacing: 2px;
+            z-index: 10; transition: 0.5s;
+        }
+        .branding b { color: var(--pink); text-shadow: 0 0 5px var(--pink); }
+        .game-active .branding { bottom: -50px; } /* Hide while playing */
+
+        .version { position: absolute; bottom: 15px; left: 20px; font-size: 10px; color: #333; z-index: 10; }
     </style>
 </head>
 <body>
 
 <div id="game-wrapper">
     <div class="stats">
+        <div>Highscore: <span id="hiScore">0000</span></div>
         SCORE: <b id="scoreLabel">0000</b><br>
         SPEED: <b id="speedLabel">1.0x</b>
     </div>
 
-    <div id="start-screen" class="overlay">
-        <h1>NEON DASH</h1>
-        <button class="btn" onclick="startGame()">Init System</button>
-        <p style="margin-top: 15px; color: #555;">Space or Tap to Jump</p>
+    <div id="ui-screen" class="overlay">
+        <div class="menu-content">
+            <h1 id="main-title">NEON DASH</h1>
+            <p id="sub-title" style="color: #666; margin-bottom: 30px;">[ SYSTEM STATUS: READY ]</p>
+            
+            <button class="btn" onclick="startGame()">Start Engine</button>
+            
+            <div style="margin-top: 30px;">
+                <p style="font-size: 0.8rem; color: #888;">SELECT CORE COLOR</p>
+                <div class="skin-select">
+                    <div class="skin-dot active" style="background: #00f2ff;" onclick="setSkin('#00f2ff', this)"></div>
+                    <div class="skin-dot" style="background: #ff007f;" onclick="setSkin('#ff007f', this)"></div>
+                    <div class="skin-dot" style="background: #beff00;" onclick="setSkin('#beff00', this)"></div>
+                    <div class="skin-dot" style="background: #ffffff;" onclick="setSkin('#ffffff', this)"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <canvas id="ctx"></canvas>
 
-    <div class="footer-branding">
-        <span>Made by moe 2026</span>
-        <span>v1.0</span>
-    </div>
+    <div class="branding">Made by <b>moe 2026</b></div>
+    <div class="version">BUILD PRO_1.5</div>
 </div>
 
 <script>
@@ -70,55 +109,77 @@ const canvas = document.getElementById('ctx');
 const scp = canvas.getContext('2d');
 const scoreLabel = document.getElementById('scoreLabel');
 const speedLabel = document.getElementById('speedLabel');
+const hiLabel = document.getElementById('hiScore');
+const wrapper = document.getElementById('game-wrapper');
 
 let gameActive = false;
 let score = 0;
+let hiScore = localStorage.getItem('dashHi') || 0;
 let gameSpeed = 5;
 let frame = 0;
+let playerColor = '#00f2ff';
+hiLabel.innerText = hiScore.toString().padStart(4, '0');
 
 const player = {
-    x: 80, y: 0, w: 30, h: 30,
-    dy: 0, jumpForce: -12, gravity: 0.6,
-    grounded: false,
-    color: '#00f2ff'
+    x: 100, y: 0, w: 35, h: 35,
+    dy: 0, jumpForce: -13, gravity: 0.7,
+    grounded: false
 };
 
 let obstacles = [];
 let particles = [];
+let stars = [];
 
 function resize() {
     canvas.width = 1280;
     canvas.height = 720;
+    // Create background stars
+    stars = [];
+    for(let i=0; i<100; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2 });
+    }
 }
 window.addEventListener('resize', resize);
 resize();
 
+function setSkin(color, el) {
+    playerColor = color;
+    document.querySelectorAll('.skin-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+}
+
 function doJump() {
+    if(!gameActive) return;
     if (player.grounded) {
         player.dy = player.jumpForce;
         player.grounded = false;
-        createExplosion(player.x, player.y + player.h, '#ff007f');
+        createExplosion(player.x + 17, player.y + 35, playerColor, 15);
     }
 }
-window.addEventListener('keydown', (e) => { if(e.code === 'Space') doJump(); });
+
+window.addEventListener('keydown', (e) => { if(e.code === 'Space' || e.code === 'ArrowUp') doJump(); });
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); doJump(); });
 
-function createExplosion(x, y, color) {
-    for(let i=0; i<10; i++) {
+function createExplosion(x, y, color, count) {
+    for(let i=0; i<count; i++) {
         particles.push({
             x: x, y: y,
-            vx: (Math.random() - 0.5) * 5,
-            vy: (Math.random() - 0.5) * 5,
-            life: 1.0, color: color
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            life: 1.0, color: color,
+            size: Math.random() * 5
         });
     }
 }
 
 function startGame() {
-    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('ui-screen').style.display = 'none';
+    wrapper.classList.add('game-active');
     gameActive = true;
-    score = 0; gameSpeed = 6; obstacles = []; particles = [];
-    player.y = canvas.height - 100;
+    score = 0; gameSpeed = 7; obstacles = []; particles = [];
+    player.y = canvas.height - 150;
+    player.dy = 0;
+    frame = 0;
     requestAnimationFrame(update);
 }
 
@@ -128,33 +189,40 @@ function update() {
     player.dy += player.gravity;
     player.y += player.dy;
 
-    const floor = canvas.height - 80;
-    if (player.y + player.h > floor) {
-        player.y = floor - player.h;
+    const floorY = canvas.height - 100;
+    if (player.y + player.h > floorY) {
+        player.y = floorY - player.h;
         player.dy = 0;
         player.grounded = true;
     }
 
-    if (frame % 100 === 0) {
-        obstacles.push({ x: canvas.width, w: 40, h: 40 + Math.random() * 60, type: 'danger' });
+    // Spawn management
+    let spawnRate = Math.max(40, 90 - (gameSpeed * 2));
+    if (frame % Math.floor(spawnRate) === 0) {
+        obstacles.push({ x: canvas.width, w: 45, h: 40 + Math.random() * 70 });
     }
 
     obstacles.forEach((obs, index) => {
         obs.x -= gameSpeed;
-        if (player.x < obs.x + obs.w && player.x + player.w > obs.x &&
-            player.y < (canvas.height - 80) && player.y + player.h > (canvas.height - 80 - obs.h)) {
+        
+        // Hitbox (slightly smaller for fairness)
+        if (player.x + 5 < obs.x + obs.w && player.x + player.w - 5 > obs.x &&
+            player.y + 5 < floorY && player.y + player.h > (floorY - obs.h)) {
             gameOver();
         }
         if (obs.x + obs.w < 0) obstacles.splice(index, 1);
     });
 
     particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        p.x += p.vx; p.y += p.vy; p.life -= 0.025;
         if(p.life <= 0) particles.splice(i, 1);
     });
 
     score++;
-    if(score % 500 === 0) gameSpeed += 0.5;
+    if(score % 600 === 0) {
+        gameSpeed += 0.6;
+        createExplosion(canvas.width/2, canvas.height/2, varColor('--neon'), 20);
+    }
 
     draw();
     frame++;
@@ -162,51 +230,75 @@ function update() {
 }
 
 function draw() {
+    // Clear
     scp.fillStyle = '#000';
     scp.fillRect(0, 0, canvas.width, canvas.height);
 
-    scp.strokeStyle = varColor('--neon');
-    scp.lineWidth = 4;
-    scp.beginPath();
-    scp.moveTo(0, canvas.height - 80);
-    scp.lineTo(canvas.width, canvas.height - 80);
-    scp.stroke();
-
-    scp.strokeStyle = '#111';
-    for(let i=0; i<canvas.width; i+=40) {
-        scp.beginPath(); scp.moveTo(i - (frame % 40), canvas.height - 80);
-        scp.lineTo(i - (frame % 40) - 100, canvas.height); scp.stroke();
-    }
-
-    scp.fillStyle = player.color;
-    scp.shadowBlur = 15; scp.shadowColor = player.color;
-    scp.fillRect(player.x, player.y, player.w, player.h);
-
-    scp.fillStyle = '#ff007f';
-    scp.shadowColor = '#ff007f';
-    obstacles.forEach(obs => {
-        scp.fillRect(obs.x, canvas.height - 80 - obs.h, obs.w, obs.h);
+    // Stars Parallax
+    scp.fillStyle = "#333";
+    stars.forEach(s => {
+        s.x -= gameSpeed * 0.1;
+        if(s.x < 0) s.x = canvas.width;
+        scp.fillRect(s.x, s.y, s.s, s.s);
     });
 
+    // Floor Line
+    scp.strokeStyle = varColor('--neon');
+    scp.lineWidth = 4;
+    scp.shadowBlur = 15; scp.shadowColor = varColor('--neon');
+    scp.beginPath();
+    scp.moveTo(0, canvas.height - 100);
+    scp.lineTo(canvas.width, canvas.height - 100);
+    scp.stroke();
+
+    // Draw Player
+    scp.fillStyle = playerColor;
+    scp.shadowColor = playerColor;
+    scp.fillRect(player.x, player.y, player.w, player.h);
+    // Player Glow Eye
+    scp.fillStyle = "white";
+    scp.fillRect(player.x + 20, player.y + 8, 8, 4);
+
+    // Draw Obstacles
+    scp.fillStyle = varColor('--pink');
+    scp.shadowColor = varColor('--pink');
+    obstacles.forEach(obs => {
+        scp.fillRect(obs.x, canvas.height - 100 - obs.h, obs.w, obs.h);
+        // Add detail line to obstacle
+        scp.fillStyle = "rgba(0,0,0,0.3)";
+        scp.fillRect(obs.x + 5, canvas.height - 100 - obs.h + 5, 5, obs.h - 10);
+        scp.fillStyle = varColor('--pink');
+    });
+
+    // Draw Particles
     particles.forEach(p => {
         scp.globalAlpha = p.life;
         scp.fillStyle = p.color;
-        scp.fillRect(p.x, p.y, 4, 4);
+        scp.shadowBlur = 5;
+        scp.fillRect(p.x, p.y, p.size, p.size);
     });
+    
     scp.globalAlpha = 1.0;
     scp.shadowBlur = 0;
 
     scoreLabel.innerText = score.toString().padStart(4, '0');
-    speedLabel.innerText = (gameSpeed/5).toFixed(1) + 'x';
+    speedLabel.innerText = (gameSpeed/7).toFixed(1) + 'x';
 }
 
-function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name); }
+function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
 function gameOver() {
     gameActive = false;
-    document.getElementById('start-screen').style.display = 'flex';
-    document.querySelector('h1').innerText = "SYSTEM CRASH";
-    document.querySelector('.btn').innerText = "Reboot";
+    wrapper.classList.remove('game-active');
+    if(score > hiScore) {
+        hiScore = score;
+        localStorage.setItem('dashHi', hiScore);
+        hiLabel.innerText = hiScore.toString().padStart(4, '0');
+    }
+    
+    document.getElementById('ui-screen').style.display = 'flex';
+    document.getElementById('main-title').innerText = "CORE HALTED";
+    document.getElementById('sub-title').innerHTML = "FINAL SCORE: " + score + "<br>REBOOT SYSTEM TO CONTINUE";
 }
 </script>
 </body>
