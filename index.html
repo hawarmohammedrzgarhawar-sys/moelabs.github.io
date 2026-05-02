@@ -3,48 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON CYBER DASH: MOE EDITION</title>
+    <title>NEON CYBER DASH: MOE EDITION V2</title>
     <style>
-        :root { --neon: #00f2ff; --pink: #ff007f; --gold: #ffcc00; --bg: #020205; }
+        :root { --neon: #00f2ff; --pink: #ff007f; --gold: #ffcc00; --bg: #020205; --glass: rgba(0, 242, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; user-select: none; touch-action: none; }
-        body { background-color: #000; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
-        #game-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: var(--bg); }
-        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+        body { background-color: #000; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #game-container { position: relative; width: 100%; height: 100%; background: var(--bg); }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
         
-        .system-badge { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--pink); border-radius: 4px; font-size: 12px; color: var(--pink); text-transform: uppercase; letter-spacing: 2px; z-index: 100; }
-
+        /* HUD & UI */
+        .system-badge { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--pink); border-radius: 4px; font-size: 12px; color: var(--pink); text-transform: uppercase; z-index: 100; }
         .hud { position: absolute; top: 20px; left: 20px; pointer-events: none; z-index: 100; display: flex; gap: 30px; }
         .hud-label { font-size: 10px; color: #555; text-transform: uppercase; }
         .hud-value { font-size: 22px; color: var(--neon); font-weight: bold; }
-        .coin-value { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
 
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; transition: 0.5s; }
-        h1 { font-size: clamp(2rem, 8vw, 4rem); color: var(--neon); text-shadow: 0 0 30px var(--neon); font-style: italic; margin-bottom: 5px; }
-        .btn { background: transparent; border: 2px solid var(--neon); color: var(--neon); padding: 15px 50px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 5px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
-        .btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 40px var(--neon); }
+        /* Modern Menu System */
+        .overlay { position: absolute; inset: 0; background: rgba(2, 2, 5, 0.9); backdrop-filter: blur(15px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+        .menu-card { background: var(--glass); border: 1px solid var(--neon); padding: 40px; border-radius: 15px; text-align: center; min-width: 320px; }
+        h1 { font-size: 3rem; color: var(--neon); text-shadow: 0 0 20px var(--neon); margin-bottom: 20px; font-style: italic; }
+        
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .tab-btn { background: transparent; border: 1px solid #333; color: #666; padding: 5px 15px; cursor: pointer; font-size: 10px; }
+        .tab-btn.active { border-color: var(--pink); color: var(--pink); }
+
+        .btn { background: var(--neon); border: none; color: #000; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn:hover { box-shadow: 0 0 30px var(--neon); transform: scale(1.05); }
+
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; color: #ccc; font-size: 14px; }
+        .toggle { width: 40px; height: 20px; background: #333; border-radius: 10px; position: relative; cursor: pointer; }
+        .toggle.on { background: var(--neon); }
+        .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.2s; }
+        .toggle.on::after { left: 22px; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="system-badge">System: <b>moe 2026</b></div>
+    <div class="system-badge">OS: <b>CyberMoe_v2</b></div>
     
     <div class="hud">
-        <div>
-            <div class="hud-label">Distance</div>
-            <div id="scoreVal" class="hud-value">0000</div>
-        </div>
-        <div>
-            <div class="hud-label">Wallet</div>
-            <div id="coinVal" class="hud-value coin-value">0</div>
-        </div>
+        <div><div class="hud-label">Dist</div><div id="scoreVal" class="hud-value">0000</div></div>
+        <div><div class="hud-label">Wallet</div><div id="coinVal" class="hud-value" style="color:var(--gold)">0</div></div>
     </div>
 
     <div id="menu" class="overlay">
-        <h1 id="menuTitle">CYBER DASH</h1>
-        <p id="menuSub" style="color: #666; letter-spacing: 3px;">SYSTEM READY_</p>
-        <button class="btn" onclick="initGame()">Start Engine</button>
-        <p style="margin-top: 20px; color: #333; font-size: 12px;">Highscore: <span id="hiScoreVal">0</span></p>
+        <div class="menu-card">
+            <h1 id="menuTitle">CYBER DASH</h1>
+            
+            <div class="tab-container">
+                <div class="tab-btn active" onclick="switchTab('main')">ENGINE</div>
+                <div class="tab-btn" onclick="switchTab('settings')">CONFIG</div>
+            </div>
+
+            <div id="tab-main">
+                <p id="menuSub" style="color: #666; margin-bottom: 20px;">SYSTEM STATUS: OPTIMAL</p>
+                <button class="btn" onclick="initGame()">Start Dash</button>
+                <p style="margin-top: 20px; color: #444; font-size: 12px;">RECORD: <span id="hiScoreVal">0</span></p>
+            </div>
+
+            <div id="tab-settings" class="hidden">
+                <div class="setting-row">
+                    <span>PARTICLES</span>
+                    <div id="opt-fx" class="toggle on" onclick="toggleOpt('fx')"></div>
+                </div>
+                <div class="setting-row">
+                    <span>BATTERY SAVER (30FPS)</span>
+                    <div id="opt-fps" class="toggle" onclick="toggleOpt('fps')"></div>
+                </div>
+                <button class="btn" style="margin-top:20px; background: #333; color: #fff;" onclick="switchTab('main')">Back</button>
+            </div>
+        </div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -53,8 +83,6 @@
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const menu = document.getElementById('menu');
-    
     const V_WIDTH = 1280, V_HEIGHT = 720;
     
     let state = {
@@ -63,17 +91,30 @@
         coins: parseInt(localStorage.getItem('moeCoins')) || 0,
         hiScore: localStorage.getItem('moeDashHi') || 0,
         speed: 8,
-        frame: 0
+        frame: 0,
+        settings: { fx: true, lowFps: false }
     };
 
-    let player = { x: 150, y: 0, w: 50, h: 60, dy: 0, jump: -18, grav: 0.9, grounded: false, anim: 0 };
-    let obstacles = [], coins = [], particles = [];
-    let bgStars = [];
+    let player = { x: 150, y: 0, w: 50, h: 60, dy: 0, jump: -18, grav: 0.9, grounded: false, anim: 0, tilt: 0 };
+    let obstacles = [], coins = [], particles = [], bgStars = [];
 
     function setup() {
         canvas.width = V_WIDTH; canvas.height = V_HEIGHT;
-        for(let i=0; i<100; i++) bgStars.push({ x: Math.random()*V_WIDTH, y: Math.random()*V_HEIGHT, s: Math.random()*2 });
+        for(let i=0; i<80; i++) bgStars.push({ x: Math.random()*V_WIDTH, y: Math.random()*V_HEIGHT, s: Math.random()*2 });
         updateHUD();
+    }
+
+    // --- UI LOGIC ---
+    function switchTab(tab) {
+        document.getElementById('tab-main').classList.toggle('hidden', tab !== 'main');
+        document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(tab)));
+    }
+
+    function toggleOpt(id) {
+        const el = document.getElementById('opt-' + id);
+        el.classList.toggle('on');
+        state.settings[id === 'fx' ? 'fx' : 'lowFps'] = el.classList.contains('on');
     }
 
     function updateHUD() {
@@ -82,11 +123,12 @@
         document.getElementById('hiScoreVal').innerText = state.hiScore;
     }
 
+    // --- GAME ENGINE ---
     function initGame() {
-        menu.style.display = 'none';
+        document.getElementById('menu').style.display = 'none';
         state.active = true;
         state.score = 0; state.speed = 9; state.frame = 0;
-        obstacles = []; coins = [];
+        obstacles = []; coins = []; particles = [];
         player.y = V_HEIGHT - 160;
         loop();
     }
@@ -95,7 +137,7 @@
         if(!state.active) return;
         update();
         draw();
-        requestAnimationFrame(loop);
+        setTimeout(() => requestAnimationFrame(loop), state.settings.lowFps ? 33 : 0);
     }
 
     function update() {
@@ -109,107 +151,123 @@
             player.y = ground - player.h;
             player.dy = 0;
             player.grounded = true;
-            player.anim += 0.15; // Leg animation speed
+            player.anim += 0.2; 
+            player.tilt = Math.sin(state.frame * 0.1) * 0.05; // Lean animation
         } else {
-            player.anim = 0; // Jump pose
+            player.grounded = false;
+            player.tilt = -0.1;
         }
 
-        if(state.frame % 500 === 0) state.speed += 0.5;
+        if(state.frame % 600 === 0) state.speed += 0.5;
 
-        // Spawn Logic
-        if(state.frame % 80 === 0) obstacles.push({ x: V_WIDTH, w: 50, h: 50 + Math.random()*100 });
-        if(state.frame % 120 === 0) coins.push({ x: V_WIDTH, y: V_HEIGHT - 200 - Math.random()*200, w: 30, h: 30, collected: false });
+        // Spawn logic
+        if(state.frame % 85 === 0) obstacles.push({ x: V_WIDTH, w: 40 + Math.random()*30, h: 50 + Math.random()*80 });
+        if(state.frame % 150 === 0) coins.push({ x: V_WIDTH, y: V_HEIGHT - 250 - Math.random()*150, spin: 0 });
 
-        // Move & Collide Obstacles
         obstacles.forEach((o, i) => {
             o.x -= state.speed;
             if(player.x < o.x + o.w && player.x + player.w > o.x && player.y + player.h > ground - o.h) gameOver();
             if(o.x + o.w < 0) obstacles.splice(i, 1);
         });
 
-        // Move & Collect Coins
         coins.forEach((c, i) => {
             c.x -= state.speed;
-            if(!c.collected && player.x < c.x + c.w && player.x + player.w > c.x && player.y < c.y + c.h && player.y + player.h > c.y) {
-                c.collected = true;
+            c.spin += 0.1;
+            if(player.x < c.x + 30 && player.x + player.w > c.x && player.y < c.y + 30 && player.y + player.h > c.y) {
                 state.coins++;
                 localStorage.setItem('moeCoins', state.coins);
-                createExplosion(c.x, c.y, '#ffcc00', 10);
+                if(state.settings.fx) createExplosion(c.x + 15, c.y + 15, '#ffcc00', 8);
+                coins.splice(i, 1);
                 updateHUD();
             }
-            if(c.x + c.w < 0) coins.splice(i, 1);
+            if(c.x < -50) coins.splice(i, 1);
         });
 
-        particles.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.a -= 0.03;
-            if(p.a <= 0) particles.splice(i, 1);
-        });
+        if(state.settings.fx) {
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy; p.a -= 0.02;
+                if(p.a <= 0) particles.splice(i, 1);
+            });
+        }
     }
 
     function draw() {
         ctx.fillStyle = '#020205'; ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-        // Stars
+        // Parallax Stars
         ctx.fillStyle = "#fff";
         bgStars.forEach(s => {
             s.x -= state.speed * 0.1;
             if(s.x < 0) s.x = V_WIDTH;
+            ctx.globalAlpha = 0.3;
             ctx.fillRect(s.x, s.y, s.s, s.s);
         });
+        ctx.globalAlpha = 1;
 
-        // Ground
-        ctx.strokeStyle = varColor('--neon'); ctx.lineWidth = 4;
+        // Ground Grid Line
+        ctx.strokeStyle = '#00f2ff'; ctx.lineWidth = 4;
         ctx.beginPath(); ctx.moveTo(0, V_HEIGHT-100); ctx.lineTo(V_WIDTH, V_HEIGHT-100); ctx.stroke();
 
-        // Coins
+        // Coins (Animated)
         coins.forEach(c => {
-            if(!c.collected) {
-                ctx.fillStyle = '#ffcc00'; ctx.shadowBlur = 15; ctx.shadowColor = '#ffcc00';
-                ctx.beginPath(); ctx.arc(c.x + 15, c.y + 15, 12, 0, Math.PI*2); ctx.fill();
-                ctx.shadowBlur = 0;
-            }
+            ctx.fillStyle = '#ffcc00';
+            let spinW = Math.abs(Math.sin(c.spin)) * 24;
+            ctx.shadowBlur = 15; ctx.shadowColor = '#ffcc00';
+            ctx.beginPath();
+            ctx.ellipse(c.x + 15, c.y + 15, spinW/2, 12, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
         });
 
         // Obstacles
         ctx.fillStyle = '#ff007f';
-        obstacles.forEach(o => ctx.fillRect(o.x, V_HEIGHT - 100 - o.h, o.w, o.h));
+        obstacles.forEach(o => {
+            ctx.fillRect(o.x, V_HEIGHT - 100 - o.h, o.w, o.h);
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 1;
+            ctx.strokeRect(o.x+5, V_HEIGHT - 95 - o.h, o.w-10, o.h-5);
+        });
 
-        // THE RUNNER (moe-bot)
+        // ANIMATED PLAYER (Moe-Bot)
         ctx.save();
-        ctx.translate(player.x, player.y);
-        ctx.shadowBlur = 20; ctx.shadowColor = varColor('--neon');
-        ctx.fillStyle = varColor('--neon');
+        ctx.translate(player.x + 25, player.y + 30);
+        ctx.rotate(player.tilt);
+        ctx.translate(-25, -30);
         
-        // Body (leaning forward)
-        ctx.fillRect(5, 5, 30, 35); 
-        // Head
-        ctx.fillRect(15, -10, 20, 15);
-        // Eye (moe-style)
-        ctx.fillStyle = "#fff"; ctx.fillRect(28, -5, 8, 3);
-        
-        // Animated Legs
-        ctx.fillStyle = varColor('--neon');
+        ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+        ctx.fillStyle = '#00f2ff';
+        // Body
+        ctx.fillRect(5, 5, 35, 40); 
+        // Head with "Visor"
+        ctx.fillRect(15, -15, 25, 20);
+        ctx.fillStyle = "#000"; ctx.fillRect(25, -10, 15, 5); 
+        ctx.fillStyle = "#fff"; ctx.fillRect(30, -9, 8, 2);
+
+        // Leg Animations
+        ctx.fillStyle = '#00f2ff';
         if(player.grounded) {
-            let leg1 = Math.sin(player.anim) * 15;
-            let leg2 = Math.sin(player.anim + Math.PI) * 15;
-            ctx.fillRect(10, 40, 8, 10 + leg1); // Leg L
-            ctx.fillRect(22, 40, 8, 10 + leg2); // Leg R
+            let legY1 = Math.sin(player.anim) * 12;
+            let legY2 = Math.sin(player.anim + Math.PI) * 12;
+            ctx.fillRect(10, 45, 10, 10 + legY1);
+            ctx.fillRect(25, 45, 10, 10 + legY2);
         } else {
-            ctx.fillRect(5, 40, 8, 5); // Tucked legs for jump
-            ctx.fillRect(25, 35, 8, 10);
+            ctx.fillRect(5, 45, 10, 5);
+            ctx.fillRect(20, 40, 10, 8);
         }
         ctx.restore();
 
-        // Particles
-        particles.forEach(p => {
-            ctx.globalAlpha = p.a; ctx.fillStyle = p.c;
-            ctx.fillRect(p.x, p.y, 4, 4);
-        });
+        if(state.settings.fx) {
+            particles.forEach(p => {
+                ctx.globalAlpha = p.a; ctx.fillStyle = p.c;
+                ctx.fillRect(p.x, p.y, 4, 4);
+            });
+        }
         ctx.globalAlpha = 1;
     }
 
     function createExplosion(x, y, color, count) {
-        for(let i=0; i<count; i++) particles.push({ x: x, y: y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, a: 1, c: color });
+        for(let i=0; i<count; i++) {
+            particles.push({ x: x, y: y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, a: 1, c: color });
+        }
     }
 
     function gameOver() {
@@ -219,14 +277,14 @@
             state.hiScore = finalDist;
             localStorage.setItem('moeDashHi', state.hiScore);
         }
-        menu.style.display = 'flex';
-        document.getElementById('menuTitle').innerText = "FATAL ERROR";
+        document.getElementById('menu').style.display = 'flex';
+        document.getElementById('menuTitle').innerText = "SYSTEM CRASH";
         document.getElementById('menuSub').innerText = "SCORE: " + finalDist + " | WALLET: " + state.coins;
+        switchTab('main');
         updateHUD();
     }
 
-    function varColor(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
-    window.addEventListener('keydown', (e) => { if(e.code === 'Space') { if(player.grounded) { player.dy = player.jump; player.grounded = false; } } });
+    window.addEventListener('keydown', (e) => { if(e.code === 'Space' && player.grounded) { player.dy = player.jump; player.grounded = false; } });
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(player.grounded) { player.dy = player.jump; player.grounded = false; } });
 
     setup();
