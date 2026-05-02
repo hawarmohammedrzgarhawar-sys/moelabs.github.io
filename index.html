@@ -3,145 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON CYBER DASH ULTIMATE - moe Labs</title>
+    <title>NEON CYBER DASH: MOE EDITION</title>
     <style>
-        :root { --neon: #00f2ff; --pink: #ff007f; --bg: #020205; }
+        :root { --neon: #00f2ff; --pink: #ff007f; --gold: #ffcc00; --bg: #020205; }
         * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; user-select: none; touch-action: none; }
+        body { background-color: #000; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
+        #game-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: var(--bg); }
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        body { 
-            background-color: #000; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100vw;
-        }
+        .system-badge { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--pink); border-radius: 4px; font-size: 12px; color: var(--pink); text-transform: uppercase; letter-spacing: 2px; z-index: 100; }
 
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg);
-        }
+        .hud { position: absolute; top: 20px; left: 20px; pointer-events: none; z-index: 100; display: flex; gap: 30px; }
+        .hud-label { font-size: 10px; color: #555; text-transform: uppercase; }
+        .hud-value { font-size: 22px; color: var(--neon); font-weight: bold; }
+        .coin-value { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
 
-        /* Responsive Canvas */
-        canvas { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain;
-            box-shadow: 0 0 100px rgba(0, 242, 255, 0.1);
-        }
-
-        /* Branding Badge */
-        .system-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid var(--pink);
-            border-radius: 4px;
-            font-size: 12px;
-            color: var(--pink);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            z-index: 100;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
-        }
-
-        /* UI Overlays */
-        .overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            transition: opacity 0.5s;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 8vw, 4.5rem);
-            color: var(--neon);
-            text-shadow: 0 0 30px var(--neon);
-            font-weight: 900;
-            letter-spacing: -2px;
-            font-style: italic;
-            margin-bottom: 5px;
-        }
-
-        .btn {
-            background: transparent;
-            border: 2px solid var(--neon);
-            color: var(--neon);
-            padding: 15px 50px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 30px;
-            border-radius: 2px;
-        }
-
-        .btn:hover {
-            background: var(--neon);
-            color: #000;
-            box-shadow: 0 0 40px var(--neon);
-        }
-
-        .skin-box {
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .skin-list {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .skin-item {
-            width: 40px;
-            height: 40px;
-            border: 2px solid transparent;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .skin-item.active {
-            border-color: #fff;
-            box-shadow: 0 0 20px #fff;
-            transform: scale(1.2);
-        }
-
-        .hud {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .hud-label { font-size: 12px; color: #555; text-transform: uppercase; }
-        .hud-value { font-size: 24px; color: var(--neon); font-weight: bold; text-shadow: 0 0 10px var(--neon); }
-
-        /* Mobile Controls Helper */
-        .mobile-hint {
-            position: absolute;
-            bottom: 30px;
-            color: #444;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; transition: 0.5s; }
+        h1 { font-size: clamp(2rem, 8vw, 4rem); color: var(--neon); text-shadow: 0 0 30px var(--neon); font-style: italic; margin-bottom: 5px; }
+        .btn { background: transparent; border: 2px solid var(--neon); color: var(--neon); padding: 15px 50px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 5px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 40px var(--neon); }
     </style>
 </head>
 <body>
@@ -150,28 +30,21 @@
     <div class="system-badge">System: <b>moe 2026</b></div>
     
     <div class="hud">
-        <div class="hud-label">Dist_Travelled</div>
-        <div id="scoreVal" class="hud-value">0000</div>
-        <div class="hud-label" style="margin-top: 10px;">Hi_Score</div>
-        <div id="hiScoreVal" class="hud-value" style="font-size: 16px; color: var(--pink); text-shadow: none;">0000</div>
+        <div>
+            <div class="hud-label">Distance</div>
+            <div id="scoreVal" class="hud-value">0000</div>
+        </div>
+        <div>
+            <div class="hud-label">Wallet</div>
+            <div id="coinVal" class="hud-value coin-value">0</div>
+        </div>
     </div>
 
     <div id="menu" class="overlay">
-        <h1>CYBER DASH</h1>
-        <p style="color: #666; letter-spacing: 5px;">ULTIMATE VERSION 2026</p>
-        
-        <button class="btn" onclick="initGame()">Initialize</button>
-
-        <div class="skin-box">
-            <p style="font-size: 10px; color: #444; letter-spacing: 2px;">CORE_COLOR_SELECT</p>
-            <div class="skin-list">
-                <div class="skin-item active" style="background: #00f2ff;" onclick="changeSkin('#00f2ff', this)"></div>
-                <div class="skin-item" style="background: #ff007f;" onclick="changeSkin('#ff007f', this)"></div>
-                <div class="skin-item" style="background: #beff00;" onclick="changeSkin('#beff00', this)"></div>
-                <div class="skin-item" style="background: #ffffff;" onclick="changeSkin('#ffffff', this)"></div>
-            </div>
-        </div>
-        <div class="mobile-hint">Tap or Space to Jump</div>
+        <h1 id="menuTitle">CYBER DASH</h1>
+        <p id="menuSub" style="color: #666; letter-spacing: 3px;">SYSTEM READY_</p>
+        <button class="btn" onclick="initGame()">Start Engine</button>
+        <p style="margin-top: 20px; color: #333; font-size: 12px;">Highscore: <span id="hiScoreVal">0</span></p>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -181,72 +54,53 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const menu = document.getElementById('menu');
-    const scoreText = document.getElementById('scoreVal');
-    const hiScoreText = document.getElementById('hiScoreVal');
-
-    // Game Constants
-    const V_WIDTH = 1280;
-    const V_HEIGHT = 720;
+    
+    const V_WIDTH = 1280, V_HEIGHT = 720;
     
     let state = {
         active: false,
         score: 0,
+        coins: parseInt(localStorage.getItem('moeCoins')) || 0,
         hiScore: localStorage.getItem('moeDashHi') || 0,
         speed: 8,
-        frame: 0,
-        playerColor: '#00f2ff'
+        frame: 0
     };
 
-    hiScoreText.innerText = state.hiScore.toString().padStart(4, '0');
-
-    // Game Objects
-    let player = { x: 150, y: 0, w: 40, h: 40, dy: 0, jump: -16, grav: 0.8, grounded: false };
-    let obstacles = [];
-    let particles = [];
-    let bgLayers = { stars: [], buildings: [], grid: 0 };
+    let player = { x: 150, y: 0, w: 50, h: 60, dy: 0, jump: -18, grav: 0.9, grounded: false, anim: 0 };
+    let obstacles = [], coins = [], particles = [];
+    let bgStars = [];
 
     function setup() {
-        canvas.width = V_WIDTH;
-        canvas.height = V_HEIGHT;
-        
-        // Init Background
-        for(let i=0; i<80; i++) bgLayers.stars.push({ x: Math.random()*V_WIDTH, y: Math.random()*V_HEIGHT, r: Math.random()*2 });
-        for(let i=0; i<10; i++) bgLayers.buildings.push({ x: i*150, w: 80+Math.random()*100, h: 200+Math.random()*300, s: 0.5+Math.random() });
+        canvas.width = V_WIDTH; canvas.height = V_HEIGHT;
+        for(let i=0; i<100; i++) bgStars.push({ x: Math.random()*V_WIDTH, y: Math.random()*V_HEIGHT, s: Math.random()*2 });
+        updateHUD();
     }
 
-    function changeSkin(color, el) {
-        state.playerColor = color;
-        document.querySelectorAll('.skin-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
+    function updateHUD() {
+        document.getElementById('scoreVal').innerText = Math.floor(state.score/10).toString().padStart(4, '0');
+        document.getElementById('coinVal').innerText = state.coins;
+        document.getElementById('hiScoreVal').innerText = state.hiScore;
     }
 
     function initGame() {
-        menu.style.opacity = '0';
-        setTimeout(() => menu.style.display = 'none', 500);
+        menu.style.display = 'none';
         state.active = true;
-        state.score = 0;
-        state.speed = 8;
-        obstacles = [];
-        player.y = V_HEIGHT - 150;
-        player.dy = 0;
+        state.score = 0; state.speed = 9; state.frame = 0;
+        obstacles = []; coins = [];
+        player.y = V_HEIGHT - 160;
         loop();
-    }
-
-    function spawnObstacle() {
-        let h = 50 + Math.random() * 80;
-        obstacles.push({ x: V_WIDTH, w: 50, h: h });
     }
 
     function loop() {
         if(!state.active) return;
         update();
         draw();
-        state.frame++;
         requestAnimationFrame(loop);
     }
 
     function update() {
-        // Player Physics
+        state.frame++;
+        state.score++;
         player.dy += player.grav;
         player.y += player.dy;
         
@@ -255,136 +109,125 @@
             player.y = ground - player.h;
             player.dy = 0;
             player.grounded = true;
+            player.anim += 0.15; // Leg animation speed
+        } else {
+            player.anim = 0; // Jump pose
         }
 
-        // Speed Logic
-        if(state.frame % 500 === 0) state.speed += 0.8;
+        if(state.frame % 500 === 0) state.speed += 0.5;
 
-        // Obstacles
-        if(state.frame % Math.max(30, Math.floor(100 - state.speed)) === 0) spawnObstacle();
-        
+        // Spawn Logic
+        if(state.frame % 80 === 0) obstacles.push({ x: V_WIDTH, w: 50, h: 50 + Math.random()*100 });
+        if(state.frame % 120 === 0) coins.push({ x: V_WIDTH, y: V_HEIGHT - 200 - Math.random()*200, w: 30, h: 30, collected: false });
+
+        // Move & Collide Obstacles
         obstacles.forEach((o, i) => {
             o.x -= state.speed;
-            // Collision (AABB)
-            if(player.x < o.x + o.w && player.x + player.w > o.x && 
-               player.y < ground && player.y + player.h > ground - o.h) {
-                gameOver();
-            }
+            if(player.x < o.x + o.w && player.x + player.w > o.x && player.y + player.h > ground - o.h) gameOver();
             if(o.x + o.w < 0) obstacles.splice(i, 1);
         });
 
-        // Particles
-        particles.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.a -= 0.02;
-            if(p.a <= 0) particles.splice(i, 1);
+        // Move & Collect Coins
+        coins.forEach((c, i) => {
+            c.x -= state.speed;
+            if(!c.collected && player.x < c.x + c.w && player.x + player.w > c.x && player.y < c.y + c.h && player.y + player.h > c.y) {
+                c.collected = true;
+                state.coins++;
+                localStorage.setItem('moeCoins', state.coins);
+                createExplosion(c.x, c.y, '#ffcc00', 10);
+                updateHUD();
+            }
+            if(c.x + c.w < 0) coins.splice(i, 1);
         });
 
-        state.score++;
-        scoreText.innerText = Math.floor(state.score/10).toString().padStart(4, '0');
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.a -= 0.03;
+            if(p.a <= 0) particles.splice(i, 1);
+        });
     }
 
     function draw() {
-        ctx.fillStyle = '#020205';
-        ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+        ctx.fillStyle = '#020205'; ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-        // 1. Stars
+        // Stars
         ctx.fillStyle = "#fff";
-        bgLayers.stars.forEach(s => {
+        bgStars.forEach(s => {
             s.x -= state.speed * 0.1;
             if(s.x < 0) s.x = V_WIDTH;
-            ctx.fillRect(s.x, s.y, s.r, s.r);
+            ctx.fillRect(s.x, s.y, s.s, s.s);
         });
 
-        // 2. Buildings (Parallax)
-        ctx.fillStyle = "#0a0a15";
-        bgLayers.buildings.forEach(b => {
-            b.x -= state.speed * 0.3;
-            if(b.x + b.w < 0) b.x = V_WIDTH;
-            ctx.fillRect(b.x, V_HEIGHT - 100 - b.h, b.w, b.h);
-            ctx.strokeStyle = "#151525";
-            ctx.strokeRect(b.x, V_HEIGHT - 100 - b.h, b.w, b.h);
-        });
-
-        // 3. Grid Warp
-        ctx.strokeStyle = "rgba(0, 242, 255, 0.1)";
-        ctx.lineWidth = 1;
-        bgLayers.grid = (bgLayers.grid - state.speed) % 50;
-        for(let i=0; i<V_WIDTH; i+=50) {
-            ctx.beginPath();
-            ctx.moveTo(i + bgLayers.grid, V_HEIGHT - 100);
-            ctx.lineTo(i + bgLayers.grid - 200, V_HEIGHT);
-            ctx.stroke();
-        }
-
-        // 4. Ground
-        const grad = ctx.createLinearGradient(0, V_HEIGHT-100, 0, V_HEIGHT);
-        grad.addColorStop(0, state.playerColor);
-        grad.addColorStop(1, "#000");
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 4;
-        ctx.shadowBlur = 20; ctx.shadowColor = state.playerColor;
+        // Ground
+        ctx.strokeStyle = varColor('--neon'); ctx.lineWidth = 4;
         ctx.beginPath(); ctx.moveTo(0, V_HEIGHT-100); ctx.lineTo(V_WIDTH, V_HEIGHT-100); ctx.stroke();
 
-        // 5. Obstacles
-        ctx.fillStyle = "#ff007f";
-        ctx.shadowColor = "#ff007f";
-        obstacles.forEach(o => {
-            ctx.fillRect(o.x, V_HEIGHT - 100 - o.h, o.w, o.h);
-            ctx.fillStyle = "rgba(255,255,255,0.2)";
-            ctx.fillRect(o.x, V_HEIGHT - 100 - o.h, o.w, 5); // Glow top
-            ctx.fillStyle = "#ff007f";
+        // Coins
+        coins.forEach(c => {
+            if(!c.collected) {
+                ctx.fillStyle = '#ffcc00'; ctx.shadowBlur = 15; ctx.shadowColor = '#ffcc00';
+                ctx.beginPath(); ctx.arc(c.x + 15, c.y + 15, 12, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
         });
 
-        // 6. Player
-        ctx.shadowBlur = 25; ctx.shadowColor = state.playerColor;
-        ctx.fillStyle = state.playerColor;
-        ctx.fillRect(player.x, player.y, player.w, player.h);
-        ctx.fillStyle = "#fff"; // Eye
-        ctx.fillRect(player.x + player.w - 12, player.y + 10, 8, 4);
+        // Obstacles
+        ctx.fillStyle = '#ff007f';
+        obstacles.forEach(o => ctx.fillRect(o.x, V_HEIGHT - 100 - o.h, o.w, o.h));
 
-        // 7. Particles
-        ctx.shadowBlur = 0;
+        // THE RUNNER (moe-bot)
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.shadowBlur = 20; ctx.shadowColor = varColor('--neon');
+        ctx.fillStyle = varColor('--neon');
+        
+        // Body (leaning forward)
+        ctx.fillRect(5, 5, 30, 35); 
+        // Head
+        ctx.fillRect(15, -10, 20, 15);
+        // Eye (moe-style)
+        ctx.fillStyle = "#fff"; ctx.fillRect(28, -5, 8, 3);
+        
+        // Animated Legs
+        ctx.fillStyle = varColor('--neon');
+        if(player.grounded) {
+            let leg1 = Math.sin(player.anim) * 15;
+            let leg2 = Math.sin(player.anim + Math.PI) * 15;
+            ctx.fillRect(10, 40, 8, 10 + leg1); // Leg L
+            ctx.fillRect(22, 40, 8, 10 + leg2); // Leg R
+        } else {
+            ctx.fillRect(5, 40, 8, 5); // Tucked legs for jump
+            ctx.fillRect(25, 35, 8, 10);
+        }
+        ctx.restore();
+
+        // Particles
         particles.forEach(p => {
-            ctx.globalAlpha = p.a;
-            ctx.fillStyle = p.c;
-            ctx.fillRect(p.x, p.y, p.s, p.s);
+            ctx.globalAlpha = p.a; ctx.fillStyle = p.c;
+            ctx.fillRect(p.x, p.y, 4, 4);
         });
         ctx.globalAlpha = 1;
     }
 
-    function jump() {
-        if(!state.active) return;
-        if(player.grounded) {
-            player.dy = player.jump;
-            player.grounded = false;
-            // Particles
-            for(let i=0; i<15; i++) {
-                particles.push({
-                    x: player.x + 20, y: player.y + 40,
-                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                    a: 1, c: state.playerColor, s: Math.random()*5
-                });
-            }
-        }
+    function createExplosion(x, y, color, count) {
+        for(let i=0; i<count; i++) particles.push({ x: x, y: y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, a: 1, c: color });
     }
 
     function gameOver() {
         state.active = false;
-        if(Math.floor(state.score/10) > state.hiScore) {
-            state.hiScore = Math.floor(state.score/10);
+        let finalDist = Math.floor(state.score/10);
+        if(finalDist > state.hiScore) {
+            state.hiScore = finalDist;
             localStorage.setItem('moeDashHi', state.hiScore);
-            hiScoreText.innerText = state.hiScore.toString().padStart(4, '0');
         }
-        
         menu.style.display = 'flex';
-        setTimeout(() => menu.style.opacity = '1', 10);
-        document.querySelector('h1').innerText = "FATAL ERROR";
-        document.querySelector('p').innerText = "SCORE: " + Math.floor(state.score/10) + " | REBOOTING...";
+        document.getElementById('menuTitle').innerText = "FATAL ERROR";
+        document.getElementById('menuSub').innerText = "SCORE: " + finalDist + " | WALLET: " + state.coins;
+        updateHUD();
     }
 
-    // Input Handling
-    window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+    function varColor(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+    window.addEventListener('keydown', (e) => { if(e.code === 'Space') { if(player.grounded) { player.dy = player.jump; player.grounded = false; } } });
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(player.grounded) { player.dy = player.jump; player.grounded = false; } });
 
     setup();
 </script>
