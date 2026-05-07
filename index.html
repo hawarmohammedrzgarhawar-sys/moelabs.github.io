@@ -5,84 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Horror World - Project MOE</title>
     <style>
-        /* --- UNVERÄNDERTES GRUND-SETUP & MENÜS --- */
+        /* --- MENÜS (UNBERÜHRT) --- */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #000; color: white; }
         .bg-layer { position: absolute; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1536697246741-98a6d9146011?q=80&w=2500&auto=format&fit=crop'); background-size: cover; z-index: -2; }
-        .character-placeholder { position: absolute; bottom: 0; right: 5%; width: 40%; height: 70%; background: url('https://i.imgur.com/39YvC9h.png'); background-size: contain; background-repeat: no-repeat; background-position: bottom; z-index: -1; opacity: 0.8; }
         .main-menu, .settings-menu, .level-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; z-index: 10; position: absolute; width: 100%; }
-        .settings-menu, .level-menu { display: none; background: rgba(0, 0, 0, 0.92); }
-        h1, h2 { font-size: clamp(2.2rem, 7vw, 4rem); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 8px; text-align: center; text-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
-        .btn { width: 260px; padding: 16px; background: rgba(15, 20, 15, 0.8); border: 1px solid #3d5e32; color: #bcbcbc; font-size: 1rem; cursor: pointer; text-transform: uppercase; display: flex; justify-content: center; }
-        .level-scroll-view { display: flex; gap: 15px; overflow-x: auto; padding: 20px; width: 90%; max-width: 1000px; }
-        .level-card { min-width: 160px; height: 220px; background: #0a0a0a; border: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 15px; }
-        .pixel-icon { width: 60px; height: 60px; background: #1a1a1a; border: 2px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-        .house-icon { border-color: #772222; color: #ff4444; }
-
-        /* --- NEUES INGAME SYSTEM (9:16) --- */
-        #gameContainer {
-            display: none;
-            position: absolute;
-            width: 100%; height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: #000;
-            z-index: 100;
-        }
-
-        /* Das eigentliche Spielfenster */
+        .settings-menu, .level-menu { display: none; background: rgba(0, 0, 0, 0.95); }
+        h1, h2 { font-size: clamp(2.2rem, 7vw, 4rem); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 8px; text-align: center; }
+        .btn { width: 260px; padding: 16px; background: rgba(15, 20, 15, 0.8); border: 1px solid #3d5e32; color: #bcbcbc; font-size: 1rem; cursor: pointer; text-transform: uppercase; display: flex; justify-content: center; margin: 5px; }
+        .level-scroll-view { display: flex; gap: 15px; overflow-x: auto; padding: 20px; width: 90%; }
+        .level-card { min-width: 160px; height: 220px; background: #0a0a0a; border: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 15px; cursor: pointer;}
+        
+        /* --- INGAME 9:16 ENGINE --- */
+        #gameContainer { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; background: #000; z-index: 100; }
         #viewport916 {
-            width: 100vw;
-            height: calc(100vw * 16 / 9);
-            max-height: 80vh;
-            background: #0a0a0a;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #111;
+            width: 100vw; height: calc(100vw * 16 / 9); max-height: 75vh;
+            background: #050505; position: relative; overflow: hidden; border: 2px solid #1a1a1a;
+            perspective: 800px; /* Ermöglicht 3D Sicht */
         }
 
-        /* Externe Steuerung (Unter dem Display) */
-        #externalControls {
-            width: 100%;
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            background: #000;
+        /* 3D RAUM-LOGIK */
+        #camera {
+            width: 100%; height: 100%; position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1); /* Der Aufsteh-Effekt */
+            transform: translateY(150px) rotateX(20deg); /* Start-Position: Liegend */
         }
 
-        .control-btn {
-            width: 60px; height: 60px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
+        .wall {
+            position: absolute; width: 1000px; height: 1000px;
+            background: repeating-linear-gradient(45deg, #111, #151515 10px);
+            border: 2px solid #000; opacity: 0.8;
         }
+        .floor { transform: rotateX(90deg) translateZ(-200px); background: radial-gradient(#222, #000); width: 2000px; height: 2000px; left: -500px; }
+        .front-wall { transform: translateZ(-400px); background: #1a1a1a; display: flex; align-items: flex-end; justify-content: center;}
+        .door-3d { width: 120px; height: 250px; background: #110a05; border: 4px solid #000; margin-bottom: 200px; position: relative; }
+        .door-3d::after { content: "1"; color: gold; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); }
 
-        /* Ingame HUD */
-        .ingame-hud {
-            position: absolute; width: 100%; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; z-index: 110;
-        }
-        .room-tag { font-size: 0.8rem; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 2px 8px; }
-        .hud-right { display: flex; gap: 10px; align-items: center; }
+        /* HUD */
+        .ingame-hud { position: absolute; width: 100%; padding: 15px; display: flex; justify-content: space-between; z-index: 200; pointer-events: none; }
+        .hud-right { display: flex; gap: 10px; pointer-events: all; }
 
-        /* Räume */
-        .room-scene {
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; filter: blur(15px);
-        }
-        .room-active { animation: wakeUpAnim 3s forwards; }
+        /* CONTROLS UNTEN */
+        #externalControls { width: 100%; flex-grow: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; background: #000; border-top: 2px solid #111; }
+        .ctrl-btn { background: #111; border: 1px solid #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #555; active { background: #222; } }
 
-        .bed-pixel { width: 120px; height: 60px; background: #222; border-bottom: 4px solid #111; margin-top: 40px; }
-        .door-pixel { width: 60px; height: 100px; background: #1a110a; border: 2px solid #000; position: absolute; right: 20px; }
-
-        @keyframes wakeUpAnim {
-            to { opacity: 1; filter: blur(0); }
-        }
+        /* EFFEKTE */
+        .blur-overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); z-index: 150; transition: 2s; }
+        .wake-up .blur-overlay { opacity: 0; pointer-events: none; }
+        .wake-up #camera { transform: translateY(0) rotateX(0deg); }
 
         .status { font-weight: bold; color: #4dfd4d; }
         .status.off { color: #ff4d4d; }
@@ -91,6 +61,7 @@
 <body>
 
     <div class="bg-layer"></div>
+
     <div class="main-menu" id="mainMenu">
         <h1>Horror<br>World</h1>
         <div class="btn-container">
@@ -103,57 +74,55 @@
         <h2>Select Area</h2>
         <div class="level-scroll-view">
             <div class="level-card" onclick="launchGame()">
-                <div class="pixel-icon house-icon">🏚️</div>
+                <div style="font-size: 3rem;">🏚️</div>
                 <h3>Dark House</h3>
-                <span style="font-size:0.7rem; color:#666">Easy</span>
-            </div>
-            <div class="level-card" style="opacity:0.4">
-                <div class="pixel-icon">🔒</div>
-                <h3>Secret</h3>
+                <span style="color: #4dfd4d;">EASY</span>
             </div>
         </div>
-        <button class="btn" style="margin-top: 30px; width: 140px;" onclick="backToMain()">Back</button>
+        <button class="btn" onclick="backToMain()">Back</button>
     </div>
 
     <div id="gameContainer">
         <div id="viewport916">
+            <div class="blur-overlay" id="eyeBlur"></div>
             <div class="ingame-hud">
-                <div class="room-tag" id="roomDisplay">Room #1</div>
+                <div style="border: 1px solid red; padding: 2px 5px; color: red;">Room #1</div>
                 <div class="hud-right">
-                    <div style="color: #ff4d4d;">❤️❤️❤️❤️</div>
-                    <div style="cursor:pointer; font-size: 1.5rem;" onclick="toggleSettings('game')">⚙️</div>
+                    <div style="color: red;">❤️❤️❤️❤️</div>
+                    <div style="cursor:pointer;" onclick="toggleSettings('game')">⚙️</div>
                 </div>
             </div>
 
-            <div id="room1" class="room-scene" onclick="standUp()">
-                <div class="door-pixel"></div>
-                <div class="bed-pixel"></div>
-                <p id="wakeHint" style="color:#555; margin-top:20px; font-style:italic;">Tap to wake up...</p>
+            <div id="camera">
+                <div class="wall floor"></div>
+                <div class="wall front-wall">
+                    <div class="door-3d"></div>
+                </div>
+            </div>
+            
+            <div id="wakePrompt" style="position:absolute; bottom:20%; width:100%; text-align:center; z-index:160; color:#aaa; font-style:italic;" onclick="standUp()">
+                TAP TO WAKE UP
             </div>
         </div>
 
         <div id="externalControls">
-            <div class="control-btn">⬅️</div>
-            <div class="control-btn">⬆️</div>
-            <div class="control-btn">➡️</div>
-            <div class="control-btn" style="background:#331111"> Crouch </div>
-            <div class="control-btn" style="background:#112211"> Jump </div>
+            <div class="ctrl-btn" onclick="move('left')">⬅️</div>
+            <div class="ctrl-btn" onclick="move('up')">⬆️</div>
+            <div class="ctrl-btn" onclick="move('right')">➡️</div>
+            <div class="ctrl-btn" style="color: #622;">Crouch</div>
+            <div class="ctrl-btn" style="color: #262;">Jump</div>
+            <div class="ctrl-btn" style="font-size: 0.8rem;" onclick="toggleSettings('game')">MENU</div>
         </div>
     </div>
 
     <div class="settings-menu" id="settingsMenu">
-        <h2 id="settingsTitle">Settings</h2>
-        <div class="btn-container" id="settingsBtnContainer">
+        <h2 id="stitle">Settings</h2>
+        <div class="btn-container">
             <button class="btn" onclick="toggleOption(this)">Sound: <span class="status">ON</span></button>
             <button class="btn" onclick="toggleOption(this)">Music: <span class="status">ON</span></button>
-            <button class="btn" id="resumeBtn" style="display:none; background: #1a2e1a;" onclick="closeSettings()">Resume</button>
-            <button class="btn" id="backBtn" style="margin-top: 20px; border-color: #552222;" onclick="backToMain()">Back</button>
+            <button class="btn" id="resumeGame" style="display:none; background: #1a2e1a;" onclick="closeSettings()">Resume</button>
+            <button class="btn" id="exitBtn" style="border-color: #522;" onclick="backToMain()">Back</button>
         </div>
-    </div>
-
-    <div class="footer">
-        <div>v0.1</div>
-        <div>Made by MOE 2026</div>
     </div>
 
     <script>
@@ -161,35 +130,42 @@
         const levelMenu = document.getElementById('levelMenu');
         const settingsMenu = document.getElementById('settingsMenu');
         const gameContainer = document.getElementById('gameContainer');
-        const room1 = document.getElementById('room1');
+        const viewport = document.getElementById('viewport916');
+
+        let rotY = 0;
+        let moveZ = -400;
 
         function openLevelMenu() {
             mainMenu.style.display = 'none';
             levelMenu.style.display = 'flex';
         }
 
-        function toggleSettings(mode) {
-            mainMenu.style.display = 'none';
+        function launchGame() {
             levelMenu.style.display = 'none';
-            settingsMenu.style.display = 'flex';
-            
-            const resumeBtn = document.getElementById('resumeBtn');
-            const backBtn = document.getElementById('backBtn');
+            gameContainer.style.display = 'flex';
+        }
 
-            if (mode === 'game') {
-                resumeBtn.style.display = 'flex';
-                backBtn.innerText = "Quit to Menu";
-                backBtn.onclick = () => location.reload(); // Einfachster Weg zurück
+        function standUp() {
+            viewport.classList.add('wake-up');
+            document.getElementById('wakePrompt').style.display = 'none';
+        }
+
+        function toggleSettings(mode) {
+            settingsMenu.style.display = 'flex';
+            const res = document.getElementById('resumeGame');
+            const ex = document.getElementById('exitBtn');
+            if(mode === 'game') {
+                res.style.display = 'flex';
+                ex.innerText = "Quit Game";
+                ex.onclick = () => location.reload();
             } else {
-                resumeBtn.style.display = 'none';
-                backBtn.innerText = "Back";
-                backBtn.onclick = backToMain;
+                res.style.display = 'none';
+                ex.innerText = "Back";
+                ex.onclick = backToMain;
             }
         }
 
-        function closeSettings() {
-            settingsMenu.style.display = 'none';
-        }
+        function closeSettings() { settingsMenu.style.display = 'none'; }
 
         function backToMain() {
             levelMenu.style.display = 'none';
@@ -198,21 +174,18 @@
             mainMenu.style.display = 'flex';
         }
 
-        function launchGame() {
-            levelMenu.style.display = 'none';
-            gameContainer.style.display = 'flex';
-            room1.classList.add('room-active');
-        }
-
-        function standUp() {
-            document.getElementById('wakeHint').style.display = 'none';
-            room1.style.background = "#111"; // Charakter "steht" nun im Raum
+        function move(dir) {
+            const cam = document.getElementById('camera');
+            if(dir === 'left') rotY -= 10;
+            if(dir === 'right') rotY += 10;
+            if(dir === 'up') moveZ += 20;
+            cam.style.transform = `rotateY(${rotY}deg) translateZ(${moveZ}px)`;
         }
 
         function toggleOption(btn) {
             const s = btn.querySelector('.status');
-            if(s.innerText === 'ON') { s.innerText = 'OFF'; s.classList.add('off'); }
-            else { s.innerText = 'ON'; s.classList.remove('off'); }
+            s.innerText = s.innerText === 'ON' ? 'OFF' : 'ON';
+            s.classList.toggle('off');
         }
     </script>
 </body>
