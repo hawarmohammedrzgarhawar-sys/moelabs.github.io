@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survival World - Project MOE</title>
+    <title>Horror World - Project MOE</title>
     <style>
         /* Grund-Setup */
         body, html {
@@ -22,12 +22,12 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
                         url('https://images.unsplash.com/photo-1536697246741-98a6d9146011?q=80&w=2500&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             z-index: -2;
-            filter: contrast(1.1) brightness(0.8);
+            filter: contrast(1.2) brightness(0.6) grayscale(0.3); /* Etwas düsterer für Horror */
         }
 
         .character-placeholder {
@@ -41,14 +41,14 @@
             background-repeat: no-repeat;
             background-position: bottom;
             z-index: -1;
-            opacity: 0.9;
+            opacity: 0.8;
         }
 
         .mist {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at bottom, rgba(40,60,40,0.2) 0%, transparent 80%);
+            background: radial-gradient(circle at bottom, rgba(30,40,30,0.3) 0%, transparent 80%);
             z-index: -1;
         }
 
@@ -68,16 +68,17 @@
         /* Settings verstecken am Anfang */
         .settings-menu {
             display: none;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
         }
 
         h1, h2 {
             font-size: clamp(2.5rem, 8vw, 5rem);
             margin-bottom: 40px;
             text-transform: uppercase;
-            letter-spacing: 8px;
+            letter-spacing: 10px; /* Mehr Abstand für Grusel-Effekt */
             text-align: center;
-            text-shadow: 0 0 20px rgba(100, 255, 100, 0.4), 4px 4px 15px rgba(0,0,0,1);
+            /* Horror-Glow: Mix aus dunklem Grün und Schatten */
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.2), 0 0 10px rgba(100, 255, 100, 0.3), 4px 4px 15px rgba(0,0,0,1);
         }
 
         .btn-container {
@@ -89,9 +90,9 @@
         .btn {
             width: 260px;
             padding: 18px;
-            background: rgba(20, 30, 20, 0.7);
-            border: 1px solid #4a773c;
-            color: #cfcfcf;
+            background: rgba(15, 20, 15, 0.8);
+            border: 1px solid #3d5e32;
+            color: #bcbcbc;
             font-size: 1.1rem;
             letter-spacing: 2px;
             cursor: pointer;
@@ -103,9 +104,9 @@
         }
 
         .btn:hover {
-            background: #4a773c;
+            background: #2d4a24;
             color: white;
-            box-shadow: 0 0 25px rgba(74, 119, 60, 0.5);
+            box-shadow: 0 0 25px rgba(50, 80, 40, 0.6);
             transform: translateY(-3px);
         }
 
@@ -120,7 +121,7 @@
 
         .back-btn {
             margin-top: 30px;
-            border-color: #773c3c;
+            border-color: #5e3232;
         }
 
         /* FOOTER */
@@ -135,7 +136,7 @@
             font-size: 0.85rem;
             font-weight: 300;
             letter-spacing: 1px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.4);
             z-index: 20;
         }
     </style>
@@ -147,7 +148,7 @@
     <div class="character-placeholder"></div>
 
     <div class="main-menu" id="mainMenu">
-        <h1>Survival<br>World</h1>
+        <h1>Horror<br>World</h1>
         <div class="btn-container">
             <button class="btn" onclick="startGame()">Start Game</button>
             <button class="btn" onclick="toggleMenus()">Settings</button>
@@ -174,10 +175,9 @@
 
     <script>
         function startGame() {
-            alert("Game Starting...");
+            alert("Entering the Horror World...");
         }
 
-        // Wechsel zwischen Menü und Settings
         function toggleMenus() {
             const main = document.getElementById('mainMenu');
             const settings = document.getElementById('settingsMenu');
@@ -191,7 +191,6 @@
             }
         }
 
-        // ON/OFF Logik für Sound und Musik
         function toggleSetting(btn, type) {
             const statusSpan = btn.querySelector('.status');
             if (statusSpan.innerText === 'ON') {
