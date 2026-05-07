@@ -5,77 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Horror World - Project MOE</title>
     <style>
-        /* --- BEREICH: HAUPTMENÜ & LEVEL-LISTE (UNBERÜHRT) --- */
+        /* --- BEREICH: HAUPTMENÜ & LEVEL-LISTE (UNBERÜHRT LASSEN) --- */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #000; color: white; }
-        .bg-layer { position: absolute; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1536697246741-98a6d9146011?q=80&w=2500&auto=format&fit=crop'); background-size: cover; z-index: -2; }
+        .bg-layer { position: absolute; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1536697246741-98a6d9146011?q=80&w=2500&auto=format&fit=crop'); background-size: cover; z-index: -2; filter: brightness(0.5); }
         .main-menu, .settings-menu, .level-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; z-index: 10; position: absolute; width: 100%; }
         .settings-menu, .level-menu { display: none; background: rgba(0, 0, 0, 0.95); }
-        h1, h2 { font-size: clamp(2.2rem, 7vw, 4rem); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 8px; text-align: center; }
-        .btn { width: 260px; padding: 16px; background: rgba(15, 20, 15, 0.8); border: 1px solid #3d5e32; color: #bcbcbc; font-size: 1rem; cursor: pointer; text-transform: uppercase; display: flex; justify-content: center; margin: 5px; }
-        .level-scroll-view { display: flex; gap: 15px; overflow-x: auto; padding: 20px; width: 90%; }
-        .level-card { min-width: 160px; height: 220px; background: #0a0a0a; border: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 15px; cursor: pointer;}
-        .footer { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; font-size: 0.7rem; color: #444; z-index: 5; }
+        h1, h2 { font-size: clamp(2.2rem, 7vw, 4rem); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 8px; text-align: center; text-shadow: 0 0 15px red; }
+        .btn { width: 260px; padding: 16px; background: rgba(15, 20, 15, 0.8); border: 1px solid #3d5e32; color: #bcbcbc; font-size: 1rem; cursor: pointer; text-transform: uppercase; display: flex; justify-content: center; margin: 8px; }
+        .level-scroll-view { display: flex; gap: 15px; overflow-x: auto; padding: 20px; width: 90%; max-width: 800px; }
+        .level-card { min-width: 160px; height: 220px; background: #0a0a0a; border: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 15px; cursor: pointer; }
+        .locked { opacity: 0.4; cursor: default; }
+        .footer { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; font-size: 0.8rem; color: #555; z-index: 5; }
 
-        /* --- BEREICH: INGAME ENGINE (9:16) - FIX & DESIGN --- */
+        /* --- BEREICH: INGAME ENGINE (v0.6 "Total Rebuild") - EXAKTE KOPIE --- */
         #gameContainer { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 100; }
         
-        /* Präziser 9:16 Viewport für Handy */
         #viewport916 {
             width: 85vw; height: calc(85vw * 16 / 9); max-height: 70vh;
             background: #000; position: relative; overflow: hidden; border: 2px solid #222;
-            perspective: 1000px; box-shadow: 0 0 40px #000;
+            perspective: 800px; margin-top: 10px; box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        #cameraContainer {
+        #camera {
             width: 100%; height: 100%; position: absolute;
             transform-style: preserve-3d;
             transition: transform 2.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(220px) rotateX(45deg); /* Liege-Position im Bett */
+            transform: translateY(220px) rotateX(40deg) rotateY(0deg); /* Tief liegend im Bett */
         }
 
-        /* VOLLER RAUM DESIGN */
+        /* Raumgestaltung & Texturen (EXAKT WIE IM REFERENZBILD) */
         .scene-3d { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; }
-        .wall-3d { position: absolute; background: #111; border: 1px solid #000; box-shadow: inset 0 0 100px #000; }
-        
-        .floor-3d { width: 2000px; height: 2000px; background: repeating-linear-gradient(90deg, #15110d, #15110d 30px, #0e0a07 31px); transform: rotateX(90deg) translateZ(-300px); left: -500px; }
+        .wall-3d { position: absolute; width: 1200px; height: 1200px; background: #222d2d; border: 1px solid #000; box-shadow: inset 0 0 200px #000; }
+        .floor-3d { width: 3000px; height: 3000px; background: repeating-linear-gradient(90deg, #15110d, #15110d 30px, #0e0a07 31px); transform: rotateX(90deg) translateZ(-300px); left: -1000px; }
         .ceiling-3d { width: 2000px; height: 2000px; background: #080808; transform: rotateX(90deg) translateZ(300px); left: -500px; }
-        .wall-front { width: 1000px; height: 600px; transform: translateZ(-500px) translateY(-300px); background: #0d0d0d; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; }
-        .wall-left { width: 2000px; height: 600px; transform: rotateY(90deg) translateZ(-500px) translateY(-300px); left: -500px; }
-        .wall-right { width: 2000px; height: 600px; transform: rotateY(-90deg) translateZ(-500px) translateY(-300px); left: -500px; }
+        .wall-front { width: 1000px; height: 600px; transform: translateZ(-500px) translateY(-300px); background: #222d2d; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .wall-left { width: 2000px; height: 600px; transform: rotateY(90deg) translateZ(-500px) translateY(-300px); left: -500px; background: #2a3535; }
+        .wall-right { width: 2000px; height: 600px; transform: rotateY(-90deg) translateZ(-500px) translateY(-300px); left: -500px; background: #2a3535; }
 
-        /* OBJEKTE */
-        .door-3d { width: 110px; height: 240px; background: #1a110a; border: 4px solid #000; position: relative; box-shadow: 0 0 20px #000; }
-        .lamp-3d { position: absolute; width: 40px; height: 10px; background: #333; top: 290px; left: 50%; transform: translateX(-50%) translateZ(-100px); border-radius: 50%; box-shadow: 0 0 60px 20px rgba(255,255,200,0.1); }
-        .lamp-glow { position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,180,0.05), transparent 70%); top: 100px; left: 50%; transform: translateX(-50%) translateZ(-100px); pointer-events: none; }
+        /* OBJEKTE IM RAUM */
+        .door-mesh { width: 110px; height: 230px; background: #1a110a; border: 4px solid #000; position: relative; box-shadow: 0 0 30px rgba(0,0,0,1); }
+        .door-handle { position: absolute; right: 15px; top: 50%; width: 10px; height: 10px; background: #444; border-radius: 50%; }
+        
+        .bed-3d { position: absolute; width: 200px; height: 80px; background: #1a1a1a; transform: translateZ(-200px) translateY(180px); border: 2px solid #000; }
+        .table-3d { position: absolute; width: 150px; height: 70px; background: #1a110a; transform: translateZ(50px) translateY(10px) translateX(-400px); border: 2px solid #000; }
 
-        /* HUD */
+        /* HUD & OVERLAYS (EXAKT WIE IM REFERENZBILD) */
         .ingame-hud { position: absolute; width: 100%; padding: 12px; display: flex; justify-content: space-between; z-index: 250; pointer-events: none; box-sizing: border-box; }
-        .task-box { color: #aaa; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; border-left: 2px solid red; padding-left: 5px; }
-        .hud-right { display: flex; gap: 12px; pointer-events: all; align-items: center; }
+        .task-box { color: #888; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; border-left: 2px solid red; padding-left: 5px; }
+        .hud-right { display: flex; gap: 15px; pointer-events: all; align-items: center; }
+        
+        /* Neue HUD-Elemente oben links/Mitte */
+        .silhouette-icon { color: white; font-size: 1.5rem; pointer-events: all; cursor: pointer; }
+        .wrench-icon-rect { color: white; border: 1px solid white; border-radius: 5px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 1rem; pointer-events: all; cursor: pointer; }
 
         #pauseOverlay {
             position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
             z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* STEUERUNG */
-        #externalControls { 
-            width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; 
-            padding: 15px; box-sizing: border-box; background: #000; border-top: 1px solid #111;
-        }
-        .ctrl-btn { 
-            background: #0c0c0c; border: 1px solid #222; border-radius: 12px; height: 60px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #555;
-            box-shadow: inset 0 0 10px #000; cursor: pointer;
-        }
-        .ctrl-btn:active { background: #1a1a1a; color: #fff; }
+        /* STEUERUNG (TOTAL REBUILD UNTEN LINKS) */
+        #externalControls { width: 100%; flex-grow: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; box-sizing: border-box; background: #000; border-top: 2px solid #111; }
+        .c-btn { background: radial-gradient(circle, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 50%; width: 65px; height: 65px; margin: auto; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px #000; }
+        .c-btn:active { transform: translateY(2px); box-shadow: 0 2px #000; background: #222; }
 
-        /* WAKE UP EFFECT */
-        .wake-blink { position: absolute; width: 100%; height: 100%; background: #000; z-index: 1000; pointer-events: none; opacity: 0; }
-        .is-blinking { animation: blinkAnim 2.5s forwards; }
-        @keyframes blinkAnim { 0% { opacity: 1; } 30% { opacity: 0; } 50% { opacity: 1; } 75% { opacity: 0; } 100% { opacity: 0; } }
-        .awake #cameraContainer { transform: translateY(0) rotateX(0deg); }
-
+        /* WAKE UP EFFECT & STATUS */
+        .is-awakening #camera { transform: translateY(0) rotateX(0deg); }
+        
         .status-on { color: #4dfd4d; font-weight: bold; }
         .status-off { color: #ff4d4d; font-weight: bold; }
     </style>
@@ -88,7 +83,7 @@
         <h1>Horror<br>World</h1>
         <div class="btn-container">
             <button class="btn" onclick="openLevelMenu()">Start Game</button>
-            <button class="btn" onclick="toggleSettings('main')">Settings</button>
+            <button class="btn" onclick="toggleMainSettings()">Settings</button>
         </div>
     </div>
 
@@ -100,72 +95,72 @@
                 <h3>Dark House</h3>
                 <span style="color: #4dfd4d; font-size: 0.7rem;">EASY</span>
             </div>
-            <div class="level-card" style="opacity: 0.3;">
+            <div class="level-card locked">
                 <div style="font-size: 3.5rem;">🔒</div>
                 <h3>Coming Soon</h3>
-                <span style="color: #666; font-size: 0.7rem;">LOCKED</span>
+                <span style="color: #444; font-size: 0.7rem;">LOCKED</span>
             </div>
         </div>
-        <button class="btn" style="width: 140px; margin-top: 20px;" onclick="backToMain()">Back</button>
+        <button class="btn" style="width: 150px; margin-top: 20px;" onclick="backToMain()">Back</button>
     </div>
 
     <div id="gameContainer">
         <div id="viewport916">
-            <div class="wake-blink" id="blinkLayer"></div>
-            
             <div id="pauseOverlay">
                 <h2 style="color: #444; letter-spacing: 5px;">PAUSED</h2>
-                <button class="btn" style="background: #1a2a1a;" onclick="closePause()">Resume</button>
-                <button class="btn" onclick="toggleOption(this, 's')">Sound: <span class="status-on" id="sVal">ON</span></button>
-                <button class="btn" onclick="toggleOption(this, 'm')">Music: <span class="status-on" id="mVal">ON</span></button>
-                <button class="btn" style="border-color: #411; margin-top: 20px;" onclick="location.reload()">Quit</button>
+                <button class="btn" style="background: #1a2a1a;" onclick="togglePause()">Resume</button>
+                <button class="btn" onclick="toggleGameOption('Sound')">Sound: <span class="status-on" id="sVal">ON</span></button>
+                <button class="btn" onclick="toggleGameOption('Music')">Music: <span class="status-on" id="mVal">ON</span></button>
+                <button class="btn" style="border-color: #411; margin-top: 20px;" onclick="location.reload()">Quit to Menu</button>
             </div>
 
             <div class="ingame-hud">
-                <div class="task-box">Task: Hey, look around!</div>
-                <div class="hud-right">
-                    <div style="color: red; font-size: 0.9rem;">❤️❤️❤️❤️</div>
-                    <div style="font-size: 1.6rem; cursor: pointer; filter: drop-shadow(0 0 5px red);" onclick="openPause()">⚙️</div>
+                <div style="display: flex; gap: 10px; pointer-events: all; align-items: center;">
+                    <div class="silhouette-icon" title="Character Info">🧍‍♂️</div>
+                    <div class="task-box">Task: Explore Room</div>
+                </div>
+                <div style="display: flex; gap: 10px; pointer-events: all; align-items: center;">
+                    <span style="color: red;">❤️❤️❤️❤️</span>
+                    <div class="wrench-icon-rect" onclick="togglePause()">⚙️</div>
                 </div>
             </div>
 
-            <div id="cameraContainer">
+            <div id="camera">
                 <div class="scene-3d">
-                    <div class="wall-3d floor-3d"></div>
-                    <div class="wall-3d ceiling-3d"></div>
-                    <div class="wall-3d wall-front"><div class="door-3d"></div></div>
+                    <div class="floor-3d"></div>
+                    <div class="ceiling-3d"></div>
+                    <div class="wall-3d wall-front"><div class="door-mesh"><div class="door-handle"></div></div></div>
                     <div class="wall-3d wall-left"></div>
                     <div class="wall-3d wall-right"></div>
-                    <div class="lamp-3d"></div>
-                    <div class="lamp-glow"></div>
-                    <div style="position:absolute; width: 220px; height: 90px; background: #1a1a1a; transform: translateZ(-150px) translateY(210px); border: 2px solid #000;"></div>
+                    <div class="bed-3d"></div>
+                    <div class="table-3d"></div>
                 </div>
             </div>
             
-            <div id="wakeText" style="position:absolute; bottom:20%; width:100%; text-align:center; color:#555; font-style:italic; letter-spacing: 1px;" onclick="wakeUp()">
+            <div id="wakeUpPrompt" style="position:absolute; bottom:25%; width:100%; text-align:center; color:white; font-style:italic; letter-spacing: 2px;" onclick="wakeUpCharacter()">
                 TAP TO WAKE UP
             </div>
         </div>
 
         <div id="externalControls">
-            <div class="ctrl-btn" onclick="move('left')">⬅️</div>
-            <div class="ctrl-btn" onclick="move('up')">⬆️</div>
-            <div class="ctrl-btn" onclick="move('right')">➡️</div>
-            <div class="ctrl-btn" style="font-size: 0.8rem; color: #522;">CROUCH</div>
-            <div class="ctrl-btn" style="font-size: 0.8rem; color: #252;">JUMP</div>
-            <div class="ctrl-btn" style="font-size: 0.8rem; color: #444;" onclick="openPause()">⚙️</div>
+            <div class="c-btn" onclick="move('left')">⬅️</div>
+            <div class="c-btn" onclick="move('up')">⬆️</div>
+            <div class="c-btn" onclick="move('right')">➡️</div>
+            <div class="c-btn" style="font-size: 0.8rem; color: #622;">Crouch</div>
+            <div class="c-btn" style="font-size: 0.8rem; color: #262;">Jump</div>
+            <div class="c-btn" style="font-size: 0.8rem;" onclick="togglePause()">⚙️</div>
         </div>
     </div>
 
     <div class="settings-menu" id="mainSettings">
         <h2>Settings</h2>
-        <button class="btn" onclick="toggleOption(null, 's')">Sound: ON</button>
-        <button class="btn" onclick="toggleOption(null, 'm')">Music: ON</button>
+        <button class="btn" onclick="toggleGameOption('Sound')">Sound: ON</button>
+        <button class="btn" onclick="toggleGameOption('Music')">Music: ON</button>
         <button class="btn" onclick="backToMain()">Back</button>
     </div>
 
     <div class="footer">
-        <div>v0.5</div>
+        <div>v0.6</div>
         <div>Made by MOE 2026</div>
     </div>
 
@@ -176,42 +171,45 @@
         const viewport = document.getElementById('viewport916');
         const pauseOverlay = document.getElementById('pauseOverlay');
 
-        let rY = 0;
-        let pZ = -450;
+        let rotY = 0;
+        let posZ = -450;
 
         function openLevelMenu() { mainMenu.style.display = 'none'; levelMenu.style.display = 'flex'; }
         function backToMain() { levelMenu.style.display = 'none'; document.getElementById('mainSettings').style.display = 'none'; mainMenu.style.display = 'flex'; }
-        function toggleSettings() { mainMenu.style.display = 'none'; document.getElementById('mainSettings').style.display = 'flex'; }
-
+        function toggleMainSettings() { mainMenu.style.display = 'none'; document.getElementById('mainSettings').style.display = 'flex'; }
+        
         function launchGame() {
             levelMenu.style.display = 'none';
             gameContainer.style.display = 'flex';
         }
 
-        function wakeUp() {
-            document.getElementById('blinkLayer').classList.add('is-blinking');
-            viewport.classList.add('awake');
-            document.getElementById('wakeText').style.display = 'none';
+        function wakeUpCharacter() {
+            viewport.classList.add('is-awakening');
+            document.getElementById('wakeUpPrompt').style.display = 'none';
         }
 
-        function openPause() { pauseOverlay.style.display = 'flex'; }
-        function closePause() { pauseOverlay.style.display = 'none'; }
+        function togglePause() {
+            const isPaused = pauseOverlay.style.display === 'flex';
+            pauseOverlay.style.display = isPaused ? 'none' : 'flex';
+        }
 
         function move(dir) {
-            const cam = document.getElementById('cameraContainer');
-            if(dir === 'left') rY -= 15;
-            if(dir === 'right') rY += 15;
-            if(dir === 'up') pZ += 45;
-            cam.style.transform = `rotateY(${rY}deg) translateZ(${pZ}px)`;
+            const cam = document.getElementById('camera');
+            if(dir === 'left') rotY -= 15;
+            if(dir === 'right') rotY += 15;
+            if(dir === 'up') posZ += 40;
+            cam.style.transform = `rotateY(${rotY}deg) translateZ(${posZ}px)`;
         }
 
-        function toggleOption(btn, type) {
-            const el = document.getElementById(type + 'Val');
-            if(!el) return;
-            const isOn = el.innerText === 'ON';
-            el.innerText = isOn ? 'OFF' : 'ON';
-            el.className = isOn ? 'status-off' : 'status-on';
+        function toggleGameOption(type) {
+            const el = document.getElementById(type === 'Sound' ? 'sVal' : 'mVal');
+            if(el) {
+                const isOn = el.innerText === 'ON';
+                el.innerText = isOn ? 'OFF' : 'ON';
+                el.className = isOn ? 'status-off' : 'status-on';
+            }
         }
     </script>
 </body>
 </html>
+
