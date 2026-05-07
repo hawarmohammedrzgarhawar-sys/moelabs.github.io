@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Horror World - Project MOE</title>
     <style>
-        /* --- BEREICH: HAUPTMENÜ & LEVEL-LISTE (UNBERÜHRT LASSEN) --- */
+        /* --- BEREICH: HAUPTMENÜ & LEVEL-LISTE (UNBERÜHRT) --- */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #000; color: white; }
         .bg-layer { position: absolute; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1536697246741-98a6d9146011?q=80&w=2500&auto=format&fit=crop'); background-size: cover; z-index: -2; }
         .main-menu, .settings-menu, .level-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; z-index: 10; position: absolute; width: 100%; }
@@ -16,78 +16,68 @@
         .level-card { min-width: 160px; height: 220px; background: #0a0a0a; border: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 15px; cursor: pointer;}
         .footer { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; font-size: 0.7rem; color: #444; z-index: 5; }
 
-        /* --- BEREICH: INGAME ENGINE (9:16) - HIER STECKT DIE KRAFT DRIN --- */
-        #gameContainer { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; background: #000; z-index: 100; }
+        /* --- BEREICH: INGAME ENGINE (9:16) - FIX & DESIGN --- */
+        #gameContainer { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 100; }
         
+        /* Präziser 9:16 Viewport für Handy */
         #viewport916 {
-            width: 100vw; height: calc(100vw * 16 / 9); max-height: 70vh;
-            background: #020202; position: relative; overflow: hidden; border: 2px solid #111;
-            perspective: 1200px; margin-top: 15px;
+            width: 85vw; height: calc(85vw * 16 / 9); max-height: 70vh;
+            background: #000; position: relative; overflow: hidden; border: 2px solid #222;
+            perspective: 1000px; box-shadow: 0 0 40px #000;
         }
 
-        /* 3D ROOM DESIGN */
         #cameraContainer {
             width: 100%; height: 100%; position: absolute;
             transform-style: preserve-3d;
-            transition: transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(200px) rotateX(35deg); /* Start: Im Bett liegend */
+            transition: transform 2.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(220px) rotateX(45deg); /* Liege-Position im Bett */
         }
 
+        /* VOLLER RAUM DESIGN */
         .scene-3d { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; }
-
-        .floor-3d { 
-            position: absolute; width: 3000px; height: 3000px; 
-            background: repeating-linear-gradient(90deg, #1a1510, #1a1510 40px, #14110d 42px);
-            transform: rotateX(90deg) translateZ(-250px); left: -1000px;
-        }
-
-        .wall-3d { position: absolute; width: 1200px; height: 1200px; background: #111; border: 2px solid #000; box-shadow: inset 0 0 200px #000; }
-        .wall-front { transform: translateZ(-600px); display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
+        .wall-3d { position: absolute; background: #111; border: 1px solid #000; box-shadow: inset 0 0 100px #000; }
         
-        .door-mesh { 
-            width: 130px; height: 280px; background: #1a110a; border: 6px solid #000; 
-            position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
-        .door-mesh::after { content: ''; position: absolute; right: 15px; top: 50%; width: 15px; height: 15px; background: #333; border-radius: 50%; }
+        .floor-3d { width: 2000px; height: 2000px; background: repeating-linear-gradient(90deg, #15110d, #15110d 30px, #0e0a07 31px); transform: rotateX(90deg) translateZ(-300px); left: -500px; }
+        .ceiling-3d { width: 2000px; height: 2000px; background: #080808; transform: rotateX(90deg) translateZ(300px); left: -500px; }
+        .wall-front { width: 1000px; height: 600px; transform: translateZ(-500px) translateY(-300px); background: #0d0d0d; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; }
+        .wall-left { width: 2000px; height: 600px; transform: rotateY(90deg) translateZ(-500px) translateY(-300px); left: -500px; }
+        .wall-right { width: 2000px; height: 600px; transform: rotateY(-90deg) translateZ(-500px) translateY(-300px); left: -500px; }
 
-        /* HUD & OVERLAYS */
-        .ingame-hud { position: absolute; width: 100%; padding: 15px; display: flex; justify-content: space-between; z-index: 200; pointer-events: none; }
-        .hud-left { background: rgba(255,0,0,0.1); border: 1px solid red; padding: 2px 8px; color: red; font-size: 0.7rem; font-weight: bold; }
-        .hud-right { display: flex; gap: 15px; pointer-events: all; align-items: center; }
+        /* OBJEKTE */
+        .door-3d { width: 110px; height: 240px; background: #1a110a; border: 4px solid #000; position: relative; box-shadow: 0 0 20px #000; }
+        .lamp-3d { position: absolute; width: 40px; height: 10px; background: #333; top: 290px; left: 50%; transform: translateX(-50%) translateZ(-100px); border-radius: 50%; box-shadow: 0 0 60px 20px rgba(255,255,200,0.1); }
+        .lamp-glow { position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,180,0.05), transparent 70%); top: 100px; left: 50%; transform: translateX(-50%) translateZ(-100px); pointer-events: none; }
 
-        #pauseMenuIngame {
+        /* HUD */
+        .ingame-hud { position: absolute; width: 100%; padding: 12px; display: flex; justify-content: space-between; z-index: 250; pointer-events: none; box-sizing: border-box; }
+        .task-box { color: #aaa; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; border-left: 2px solid red; padding-left: 5px; }
+        .hud-right { display: flex; gap: 12px; pointer-events: all; align-items: center; }
+
+        #pauseOverlay {
             position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-            z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* HANDY CONTROLS */
+        /* STEUERUNG */
         #externalControls { 
-            width: 100%; flex-grow: 1; display: grid; 
-            grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; 
-            box-sizing: border-box; background: #000; border-top: 1px solid #222;
+            width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; 
+            padding: 15px; box-sizing: border-box; background: #000; border-top: 1px solid #111;
         }
-        .c-btn { 
-            background: radial-gradient(circle, #1a1a1a, #0a0a0a); 
-            border: 1px solid #333; border-radius: 50%; width: 70px; height: 70px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #666; cursor: pointer; margin: auto;
-            box-shadow: 0 5px 0 #000, 0 8px 15px rgba(0,0,0,0.5);
-            transition: 0.1s;
+        .ctrl-btn { 
+            background: #0c0c0c; border: 1px solid #222; border-radius: 12px; height: 60px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #555;
+            box-shadow: inset 0 0 10px #000; cursor: pointer;
         }
-        .c-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #000; color: #fff; }
+        .ctrl-btn:active { background: #1a1a1a; color: #fff; }
 
-        /* EFFEKTE */
-        .wake-up-flash { position: absolute; width: 100%; height: 100%; background: #000; z-index: 1000; pointer-events: none; opacity: 0; }
-        .active-flash { animation: flashAnim 2.5s forwards; }
-        
-        @keyframes flashAnim {
-            0% { opacity: 1; } 20% { opacity: 0; } 40% { opacity: 1; } 60% { opacity: 0; } 100% { opacity: 0; }
-        }
-
+        /* WAKE UP EFFECT */
+        .wake-blink { position: absolute; width: 100%; height: 100%; background: #000; z-index: 1000; pointer-events: none; opacity: 0; }
+        .is-blinking { animation: blinkAnim 2.5s forwards; }
+        @keyframes blinkAnim { 0% { opacity: 1; } 30% { opacity: 0; } 50% { opacity: 1; } 75% { opacity: 0; } 100% { opacity: 0; } }
         .awake #cameraContainer { transform: translateY(0) rotateX(0deg); }
 
-        .status-text { font-weight: bold; color: #4dfd4d; }
-        .status-text.off { color: #ff4d4d; }
+        .status-on { color: #4dfd4d; font-weight: bold; }
+        .status-off { color: #ff4d4d; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -116,116 +106,111 @@
                 <span style="color: #666; font-size: 0.7rem;">LOCKED</span>
             </div>
         </div>
-        <button class="btn" style="width: 140px; margin-top: 30px;" onclick="backToMain()">Back</button>
+        <button class="btn" style="width: 140px; margin-top: 20px;" onclick="backToMain()">Back</button>
     </div>
 
     <div id="gameContainer">
         <div id="viewport916">
-            <div class="wake-up-flash" id="flash"></div>
+            <div class="wake-blink" id="blinkLayer"></div>
             
-            <div id="pauseMenuIngame">
-                <h2 style="color: #666; letter-spacing: 10px;">PAUSED</h2>
-                <button class="btn" style="background: #1a2e1a;" onclick="closePause()">Resume</button>
-                <button class="btn" onclick="toggleIngameOption(this, 'Sound')">Sound: <span class="status-text">ON</span></button>
-                <button class="btn" onclick="toggleIngameOption(this, 'Music')">Music: <span class="status-text">ON</span></button>
-                <button class="btn" style="border-color: #522; margin-top: 20px;" onclick="location.reload()">Quit to Menu</button>
+            <div id="pauseOverlay">
+                <h2 style="color: #444; letter-spacing: 5px;">PAUSED</h2>
+                <button class="btn" style="background: #1a2a1a;" onclick="closePause()">Resume</button>
+                <button class="btn" onclick="toggleOption(this, 's')">Sound: <span class="status-on" id="sVal">ON</span></button>
+                <button class="btn" onclick="toggleOption(this, 'm')">Music: <span class="status-on" id="mVal">ON</span></button>
+                <button class="btn" style="border-color: #411; margin-top: 20px;" onclick="location.reload()">Quit</button>
             </div>
 
             <div class="ingame-hud">
-                <div class="hud-left">ROOM #1</div>
+                <div class="task-box">Task: Hey, look around!</div>
                 <div class="hud-right">
-                    <div style="color: red; letter-spacing: 2px;">❤️❤️❤️❤️</div>
-                    <div style="font-size: 1.8rem; cursor: pointer; filter: drop-shadow(0 0 5px red);" onclick="openPause()">⚙️</div>
+                    <div style="color: red; font-size: 0.9rem;">❤️❤️❤️❤️</div>
+                    <div style="font-size: 1.6rem; cursor: pointer; filter: drop-shadow(0 0 5px red);" onclick="openPause()">⚙️</div>
                 </div>
             </div>
 
             <div id="cameraContainer">
                 <div class="scene-3d">
-                    <div class="floor-3d"></div>
-                    <div class="wall-3d wall-front">
-                        <div class="door-mesh"></div>
-                    </div>
-                    <div style="position:absolute; width: 250px; height: 100px; background: #222; transform: translateZ(-200px) translateY(150px); border: 1px solid #111;"></div>
+                    <div class="wall-3d floor-3d"></div>
+                    <div class="wall-3d ceiling-3d"></div>
+                    <div class="wall-3d wall-front"><div class="door-3d"></div></div>
+                    <div class="wall-3d wall-left"></div>
+                    <div class="wall-3d wall-right"></div>
+                    <div class="lamp-3d"></div>
+                    <div class="lamp-glow"></div>
+                    <div style="position:absolute; width: 220px; height: 90px; background: #1a1a1a; transform: translateZ(-150px) translateY(210px); border: 2px solid #000;"></div>
                 </div>
             </div>
             
-            <div id="tapPrompt" style="position:absolute; bottom:25%; width:100%; text-align:center; color:#666; font-style:italic; letter-spacing: 2px; z-index: 150;" onclick="executeWakeUp()">
-                TAP TO WAKE UP...
+            <div id="wakeText" style="position:absolute; bottom:20%; width:100%; text-align:center; color:#555; font-style:italic; letter-spacing: 1px;" onclick="wakeUp()">
+                TAP TO WAKE UP
             </div>
         </div>
 
         <div id="externalControls">
-            <div class="c-btn" onclick="move('left')">⬅️</div>
-            <div class="c-btn" onclick="move('up')">⬆️</div>
-            <div class="c-btn" onclick="move('right')">➡️</div>
-            <div class="c-btn" style="font-size: 0.8rem; color: #522;">CROUCH</div>
-            <div class="c-btn" style="font-size: 0.8rem; color: #252;">JUMP</div>
-            <div class="c-btn" style="font-size: 0.7rem;" onclick="openPause()">MENU</div>
+            <div class="ctrl-btn" onclick="move('left')">⬅️</div>
+            <div class="ctrl-btn" onclick="move('up')">⬆️</div>
+            <div class="ctrl-btn" onclick="move('right')">➡️</div>
+            <div class="ctrl-btn" style="font-size: 0.8rem; color: #522;">CROUCH</div>
+            <div class="ctrl-btn" style="font-size: 0.8rem; color: #252;">JUMP</div>
+            <div class="ctrl-btn" style="font-size: 0.8rem; color: #444;" onclick="openPause()">⚙️</div>
         </div>
     </div>
 
-    <div class="settings-menu" id="settingsMenu">
+    <div class="settings-menu" id="mainSettings">
         <h2>Settings</h2>
-        <button class="btn" onclick="toggleIngameOption(this, 'Sound')">Sound: <span class="status-text">ON</span></button>
-        <button class="btn" onclick="toggleIngameOption(this, 'Music')">Music: <span class="status-text">ON</span></button>
+        <button class="btn" onclick="toggleOption(null, 's')">Sound: ON</button>
+        <button class="btn" onclick="toggleOption(null, 'm')">Music: ON</button>
         <button class="btn" onclick="backToMain()">Back</button>
     </div>
 
     <div class="footer">
-        <div>v0.4 (Engine-Fix)</div>
+        <div>v0.5</div>
         <div>Made by MOE 2026</div>
     </div>
 
     <script>
         const mainMenu = document.getElementById('mainMenu');
         const levelMenu = document.getElementById('levelMenu');
-        const settingsMenu = document.getElementById('settingsMenu');
         const gameContainer = document.getElementById('gameContainer');
         const viewport = document.getElementById('viewport916');
-        const pauseMenu = document.getElementById('pauseMenuIngame');
+        const pauseOverlay = document.getElementById('pauseOverlay');
 
-        let rotY = 0;
-        let posZ = -450;
+        let rY = 0;
+        let pZ = -450;
 
-        // Menü Logik
         function openLevelMenu() { mainMenu.style.display = 'none'; levelMenu.style.display = 'flex'; }
-        function backToMain() { levelMenu.style.display = 'none'; settingsMenu.style.display = 'none'; mainMenu.style.display = 'flex'; }
-        function toggleSettings() { mainMenu.style.display = 'none'; settingsMenu.style.display = 'flex'; }
+        function backToMain() { levelMenu.style.display = 'none'; document.getElementById('mainSettings').style.display = 'none'; mainMenu.style.display = 'flex'; }
+        function toggleSettings() { mainMenu.style.display = 'none'; document.getElementById('mainSettings').style.display = 'flex'; }
 
-        // Game Logik
         function launchGame() {
             levelMenu.style.display = 'none';
             gameContainer.style.display = 'flex';
         }
 
-        function executeWakeUp() {
-            document.getElementById('flash').classList.add('active-flash');
+        function wakeUp() {
+            document.getElementById('blinkLayer').classList.add('is-blinking');
             viewport.classList.add('awake');
-            document.getElementById('tapPrompt').style.display = 'none';
+            document.getElementById('wakeText').style.display = 'none';
         }
 
-        function openPause() { pauseMenu.style.display = 'flex'; }
-        function closePause() { pauseMenu.style.display = 'none'; }
+        function openPause() { pauseOverlay.style.display = 'flex'; }
+        function closePause() { pauseOverlay.style.display = 'none'; }
 
         function move(dir) {
             const cam = document.getElementById('cameraContainer');
-            if(dir === 'left') rotY -= 15;
-            if(dir === 'right') rotY += 15;
-            if(dir === 'up') posZ += 40;
-            
-            // Kamera-Update mit Head-Bobbing Simulation
-            cam.style.transform = `rotateY(${rotY}deg) translateZ(${posZ}px)`;
+            if(dir === 'left') rY -= 15;
+            if(dir === 'right') rY += 15;
+            if(dir === 'up') pZ += 45;
+            cam.style.transform = `rotateY(${rY}deg) translateZ(${pZ}px)`;
         }
 
-        function toggleIngameOption(btn, type) {
-            const s = btn.querySelector('.status-text');
-            if(s.innerText === 'ON') {
-                s.innerText = 'OFF';
-                s.classList.add('off');
-            } else {
-                s.innerText = 'ON';
-                s.classList.remove('off');
-            }
+        function toggleOption(btn, type) {
+            const el = document.getElementById(type + 'Val');
+            if(!el) return;
+            const isOn = el.innerText === 'ON';
+            el.innerText = isOn ? 'OFF' : 'ON';
+            el.className = isOn ? 'status-off' : 'status-on';
         }
     </script>
 </body>
