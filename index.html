@@ -27,7 +27,7 @@
             background-size: cover;
             background-position: center;
             z-index: -2;
-            filter: contrast(1.2) brightness(0.6) grayscale(0.3); /* Etwas düsterer für Horror */
+            filter: contrast(1.2) brightness(0.6) grayscale(0.3);
         }
 
         .character-placeholder {
@@ -52,8 +52,8 @@
             z-index: -1;
         }
 
-        /* MENÜ CONTAINER */
-        .main-menu, .settings-menu {
+        /* CONTAINER LOGIK */
+        .main-menu, .settings-menu, .level-menu {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -65,8 +65,7 @@
             transition: 0.5s ease-in-out;
         }
 
-        /* Settings verstecken am Anfang */
-        .settings-menu {
+        .settings-menu, .level-menu {
             display: none;
             background: rgba(0, 0, 0, 0.9);
         }
@@ -75,12 +74,12 @@
             font-size: clamp(2.5rem, 8vw, 5rem);
             margin-bottom: 40px;
             text-transform: uppercase;
-            letter-spacing: 10px; /* Mehr Abstand für Grusel-Effekt */
+            letter-spacing: 10px;
             text-align: center;
-            /* Horror-Glow: Mix aus dunklem Grün und Schatten */
             text-shadow: 0 0 30px rgba(255, 0, 0, 0.2), 0 0 10px rgba(100, 255, 100, 0.3), 4px 4px 15px rgba(0,0,0,1);
         }
 
+        /* BUTTONS */
         .btn-container {
             display: flex;
             flex-direction: column;
@@ -110,18 +109,55 @@
             transform: translateY(-3px);
         }
 
-        /* Status-Text (ON/OFF) */
-        .status {
-            font-weight: bold;
-            color: #4dfd4d;
-        }
-        .status.off {
-            color: #ff4d4d;
+        /* LEVEL AUSWAHL DESIGN */
+        .level-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
         }
 
-        .back-btn {
-            margin-top: 30px;
-            border-color: #5e3232;
+        .level-card {
+            width: 220px;
+            height: 300px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid #3d5e32;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .level-card:hover {
+            transform: scale(1.05);
+            border-color: #4dfd4d;
+            box-shadow: 0 0 30px rgba(77, 253, 77, 0.2);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #444;
+        }
+
+        .level-card h3 {
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+        }
+
+        .level-card p {
+            font-size: 0.8rem;
+            color: #888;
         }
 
         /* FOOTER */
@@ -139,6 +175,9 @@
             color: rgba(255,255,255,0.4);
             z-index: 20;
         }
+
+        .status { font-weight: bold; color: #4dfd4d; }
+        .status.off { color: #ff4d4d; }
     </style>
 </head>
 <body>
@@ -150,9 +189,28 @@
     <div class="main-menu" id="mainMenu">
         <h1>Horror<br>World</h1>
         <div class="btn-container">
-            <button class="btn" onclick="startGame()">Start Game</button>
-            <button class="btn" onclick="toggleMenus()">Settings</button>
+            <button class="btn" onclick="openLevelMenu()">Start Game</button>
+            <button class="btn" onclick="toggleSettings()">Settings</button>
         </div>
+    </div>
+
+    <div class="level-menu" id="levelMenu">
+        <h2>Select Level</h2>
+        <div class="level-container">
+            <div class="level-card" onclick="startLevel(1)">
+                <h3>The Dark House</h3>
+                <p>Difficulty: Easy</p>
+            </div>
+            <div class="level-card" onclick="startLevel(2)">
+                <h3>The Asylum</h3>
+                <p>Difficulty: Hard</p>
+            </div>
+            <div class="level-card locked">
+                <h3>Coming Soon</h3>
+                <p>Stay tuned...</p>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 40px; width: 150px; justify-content: center;" onclick="backToMain()">Back</button>
     </div>
 
     <div class="settings-menu" id="settingsMenu">
@@ -164,7 +222,7 @@
             <button class="btn" onclick="toggleSetting(this, 'Music')">
                 Music: <span class="status">ON</span>
             </button>
-            <button class="btn back-btn" onclick="toggleMenus()">Back</button>
+            <button class="btn" style="margin-top: 20px; border-color: #5e3232; justify-content: center;" onclick="backToMain()">Back</button>
         </div>
     </div>
 
@@ -174,21 +232,28 @@
     </div>
 
     <script>
-        function startGame() {
-            alert("Entering the Horror World...");
+        const mainMenu = document.getElementById('mainMenu');
+        const settingsMenu = document.getElementById('settingsMenu');
+        const levelMenu = document.getElementById('levelMenu');
+
+        function openLevelMenu() {
+            mainMenu.style.display = 'none';
+            levelMenu.style.display = 'flex';
         }
 
-        function toggleMenus() {
-            const main = document.getElementById('mainMenu');
-            const settings = document.getElementById('settingsMenu');
+        function toggleSettings() {
+            mainMenu.style.display = 'none';
+            settingsMenu.style.display = 'flex';
+        }
 
-            if (settings.style.display === 'flex') {
-                settings.style.display = 'none';
-                main.style.display = 'flex';
-            } else {
-                settings.style.display = 'flex';
-                main.style.display = 'none';
-            }
+        function backToMain() {
+            levelMenu.style.display = 'none';
+            settingsMenu.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        }
+
+        function startLevel(num) {
+            alert("Loading Level " + num + "...");
         }
 
         function toggleSetting(btn, type) {
