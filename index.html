@@ -3,330 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxelBound</title>
+    <title>VoxelBound - Menu</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        :root {
+            --mc-button-gray: #AAAAAA;
+            --mc-button-border-dark: #555555;
+            --mc-button-border-light: #FFFFFF;
+            --mc-font-shadow: 2px 2px #3f3f3f;
+        }
 
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; font-family: 'Press Start 2P', cursive;
-            background: #111; color: white; touch-action: none; /* Verhindert Website-Zoom */
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace; /* Minecraft-ähnliche Schrift */
+            background: #000 url('https://minecraft.wiki/images/Pan_Background_1.17.png') no-repeat center center fixed;
+            background-size: cover;
         }
 
-        /* --- DEIN MENÜ (UNANGEFASST) --- */
-        #game-menu {
-            display: flex; flex-direction: row; align-items: center; justify-content: center; 
-            height: 100vh; width: 100vw; gap: 60px;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                        url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            position: absolute; top: 0; left: 0; z-index: 20;
+        /* Haupt-Container */
+        #menu-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
         }
 
-        @media (max-width: 600px) {
-            #game-menu { flex-direction: column; gap: 40px; }
-            h1 { font-size: 1.5rem !important; }
+        /* Titel */
+        .title {
+            font-size: 3rem;
+            color: #FFFFFF;
+            text-shadow: 4px 4px #3f3f3f;
+            margin-bottom: 40px;
+            text-align: center;
         }
 
-        .main-content { display: flex; flex-direction: column; align-items: center; }
-        h1 { font-size: 2.2rem; text-shadow: 4px 4px #000; margin-bottom: 30px; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; width: 220px; }
-
-        button {
-            background: #555; border: 4px solid #000; color: white;
-            padding: 12px; font-family: 'Press Start 2P'; font-size: 10px;
-            cursor: pointer; box-shadow: inset -3px -3px #222, inset 3px 3px #888;
-            touch-action: manipulation;
+        /* Buttons Style */
+        .mc-button {
+            width: 300px;
+            max-width: 80%;
+            height: 45px;
+            background-color: var(--mc-button-gray);
+            border: 3px solid var(--mc-button-border-dark);
+            border-top-color: var(--mc-button-border-light);
+            border-left-color: var(--mc-button-border-light);
+            color: white;
+            font-size: 1.2rem;
+            text-shadow: var(--mc-font-shadow);
+            margin: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
         }
 
-        #char-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .steve-svg { width: 100px; height: 180px; filter: drop-shadow(4px 4px 0px #000); }
-        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
-
-        .overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(20, 20, 20, 0.95); z-index: 100;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .window {
-            display: flex; flex-direction: column; gap: 15px; width: 320px;
-            background: #333; padding: 25px; border: 4px solid #000; position: relative;
+        .mc-button:active {
+            border: 3px solid var(--mc-button-border-light);
+            border-top-color: var(--mc-button-border-dark);
+            border-left-color: var(--mc-button-border-dark);
         }
 
-        .setting-row { display: flex; justify-content: space-between; align-items: center; font-size: 8px; margin-top: 5px;}
-        input[type="text"] { padding: 8px; font-family: 'Press Start 2P'; font-size: 10px; border: 3px solid #000; text-align: center; width: 80%; margin: 0 auto;}
-        input[type="range"] { cursor: pointer; accent-color: #555; width: 100px; }
-        
-        .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
-        .color-box { width: 40px; height: 40px; border: 3px solid #000; cursor: pointer; }
+        /* Charakter & Dressing Room */
+        .character-preview {
+            position: absolute;
+            right: 10%;
+            bottom: 15%;
+            text-align: center;
+        }
 
-        .back-btn { position: absolute; bottom: -50px; left: 0; background: #a33; width: 100px; padding: 8px; font-size: 8px;}
+        #steve-svg {
+            width: 120px;
+            height: auto;
+            image-rendering: pixelated;
+        }
 
-        .f-left, .f-right { position: absolute; bottom: 10px; font-size: 7px; opacity: 0.5; }
-        .f-left { left: 10px; } .f-right { right: 10px; }
+        /* Settings Overlay */
+        #settings-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-        /* --- NEUES IN-GAME HUD --- */
-        #mobile-hud { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        
-        /* Stats: Herzen & Hunger */
-        #stats-bar { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; pointer-events: none; }
-        .stat-group { display: flex; gap: 4px; color: #ff4444; font-size: 8px; }
-        .hunger { color: #8a5a2b; }
+        /* Info Texte */
+        .version-tag {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 0.9rem;
+        }
 
-        /* Inventar Hotbar */
-        #inventory { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; background: rgba(0,0,0,0.6); border: 3px solid #000; padding: 4px; pointer-events: auto; }
-        .inv-slot { width: 35px; height: 35px; border: 2px solid #888; margin: 0 2px; display: flex; align-items: center; justify-content: center; font-size: 10px; background: rgba(255,255,255,0.1); }
+        .credits {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            font-size: 0.9rem;
+        }
 
-        /* Steuerung */
-        .d-pad { position: absolute; bottom: 30px; left: 30px; display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); pointer-events: auto; }
-        .d-btn { background: rgba(255,255,255,0.2); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; user-select: none; }
-        #jump-btn { position: absolute; bottom: 40px; right: 30px; width: 70px; height: 70px; background: rgba(255,255,255,0.2); border: 3px solid #fff; border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-size: 8px; }
-        
-        #pause-btn { position: absolute; top: 20px; left: 20px; padding: 10px; font-size: 8px; pointer-events: auto; z-index: 30; }
-        #crosshair { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; opacity: 0.7; }
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            background: #000;
+            border: 2px solid #fff;
+            color: #fff;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-menu">
-        <div class="main-content">
-            <h1>VOXELBOUND</h1>
-            <div class="btn-group">
-                <button onclick="startGame()">Play</button>
-                <button onclick="openOverlay('settings-overlay')">Settings</button>
-            </div>
-        </div>
-        <div id="char-section">
-            <svg id="main-steve" class="steve-svg" viewBox="0 0 80 140">
-                <rect x="20" y="90" width="40" height="50" fill="#4a4abf" stroke="#000" stroke-width="2"/>
-                <rect x="20" y="130" width="40" height="10" fill="#333"/>
-                <rect id="arm-l" x="2" y="40" width="18" height="50" fill="#00b9d1" stroke="#000" stroke-width="2"/>
-                <rect id="arm-r" x="60" y="40" width="18" height="50" fill="#00b9d1" stroke="#000" stroke-width="2"/>
-                <rect id="shirt" x="20" y="40" width="40" height="52" fill="#00b9d1" stroke="#000" stroke-width="2"/>
-                <rect x="20" y="0" width="40" height="40" fill="#d1a083" stroke="#000" stroke-width="2"/>
-                <rect x="20" y="0" width="40" height="10" fill="#5b3927"/>
-            </svg>
-            <div id="player-name-display">Player</div>
-            <button onclick="openOverlay('dressing-overlay')">Dressing Room</button>
-        </div>
-        <div class="f-left">Made by MOE 2026</div>
-        <div class="f-right">v0.0.1 ALPHA</div>
+<div id="menu-container">
+    <h1 class="title">VOXELBOUND</h1>
+
+    <button class="mc-button" onclick="alert('Starting Game...')">PLAY</button>
+    <button class="mc-button" onclick="toggleSettings(true)">SETTINGS</button>
+
+    <div class="character-preview">
+        <p id="display-name" style="color: white; text-shadow: 2px 2px #000;">Player</p>
+        <svg id="steve-svg" viewBox="0 0 8 8">
+            <rect id="steve-body" x="2" y="0" width="4" height="8" fill="#5A5A5A" /> <rect x="2" y="0" width="4" height="4" fill="#ffdbac" /> </svg>
+        <button class="mc-button" style="width: 150px; font-size: 0.8rem;" onclick="changeColor()">DRESS ROOM</button>
     </div>
 
-    <div id="mobile-hud">
-        <button id="pause-btn" onclick="togglePause()">II</button>
-        <div id="crosshair">+</div>
-        
-        <div id="stats-bar">
-            <div class="stat-group">❤❤❤❤❤</div>
-            <div class="stat-group hunger">🍗🍗🍗🍗🍗</div>
-        </div>
+    <div class="version-tag">v1.1.2</div>
+    <div class="credits">Made by Mo MOE</div>
+</div>
 
-        <div id="inventory">
-            <div class="inv-slot" style="border-color: #fff;">🪵</div>
-            <div class="inv-slot">🥩</div>
-            <div class="inv-slot"></div>
-            <div class="inv-slot"></div>
-            <div class="inv-slot"></div>
-        </div>
+<div id="settings-screen">
+    <h2 style="color: white;">SETTINGS</h2>
+    
+    <button id="btn-music" class="mc-button" onclick="toggleOption('music')">Music: ON</button>
+    <button id="btn-sound" class="mc-button" onclick="toggleOption('sound')">Sound: ON</button>
+    
+    <label style="color: white; margin-top: 10px;">Change Name:</label>
+    <input type="text" id="name-input" placeholder="Enter Name..." oninput="updateName()">
 
-        <div class="d-pad">
-            <div></div><div class="d-btn" id="move-f">▲</div><div></div>
-            <div class="d-btn" id="move-l">◀</div><div></div><div class="d-btn" id="move-r">▶</div>
-            <div></div><div class="d-btn" id="move-b">▼</div><div></div>
-        </div>
-        <div id="jump-btn">JUMP</div>
-    </div>
+    <button class="mc-button" style="margin-top: 30px;" onclick="toggleSettings(false)">BACK</button>
+</div>
 
-    <div id="pause-overlay" class="overlay">
-        <div class="window">
-            <h2>PAUSED</h2>
-            <button onclick="togglePause()">RESUME</button>
-            <button onclick="location.reload()">QUIT</button>
-        </div>
-    </div>
+<script>
+    // System Status
+    let config = {
+        music: true,
+        sound: true,
+        version: "1.1.2",
+        playerColor: "#5A5A5A"
+    };
 
-    <div id="settings-overlay" class="overlay">
-        <div class="window">
-            <h2 style="font-size: 12px; text-align: center;">SETTINGS</h2>
-            <input type="text" id="name-input" placeholder="Name">
-            <hr style="width:100%; border:1px solid #555;">
-            <div class="setting-row"><span>Music:</span><button onclick="toggleBtn(this)">ON</button></div>
-            <div class="setting-row"><span>Sounds:</span><button onclick="toggleBtn(this)">ON</button></div>
-            <button class="back-btn" onclick="saveSettings()">BACK</button>
-        </div>
-    </div>
+    function toggleSettings(show) {
+        document.getElementById('settings-screen').style.display = show ? 'flex' : 'none';
+    }
 
-    <div id="dressing-overlay" class="overlay">
-        <div class="window">
-            <h2>DRESSING ROOM</h2>
-            <div class="color-grid">
-                <div class="color-box" style="background:#00b9d1" onclick="changeShirt('#00b9d1')"></div>
-                <div class="color-box" style="background:#d10000" onclick="changeShirt('#d10000')"></div>
-            </div>
-            <button class="back-btn" onclick="closeOverlay('dressing-overlay')">DONE</button>
-        </div>
-    </div>
+    function toggleOption(type) {
+        config[type] = !config[type];
+        document.getElementById(`btn-${type}`).innerText = `${type.toUpperCase()}: ${config[type] ? 'ON' : 'OFF'}`;
+    }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        let scene, camera, renderer, raycaster;
-        let animals = [], drops = [];
-        let move = { f: false, b: false, l: false, r: false };
-        let velocity = new THREE.Vector3(), rotation = { yaw: 0, pitch: 0 };
-        let isPaused = false;
+    function updateName() {
+        const name = document.getElementById('name-input').value;
+        document.getElementById('display-name').innerText = name || "Player";
+    }
 
-        function startGame() {
-            document.getElementById('game-menu').style.display = 'none';
-            document.getElementById('mobile-hud').style.display = 'block';
-            init3D();
-        }
+    function changeColor() {
+        // Einfacher Farbwechsel für den "Dressing Room" Effekt
+        const colors = ["#5A5A5A", "#3498db", "#e74c3c", "#2ecc71", "#f1c40f"];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        document.getElementById('steve-body').setAttribute('fill', randomColor);
+        config.playerColor = randomColor;
+    }
 
-        function init3D() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            raycaster = new THREE.Raycaster();
-            
-            renderer = new THREE.WebGLRenderer({ antialias: false });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+    // Anti-Zoom Fix für Mobile
+    document.addEventListener('touchmove', function (event) {
+        if (event.scale !== 1) { event.preventDefault(); }
+    }, { passive: false });
+</script>
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-
-            // Welt & Baum
-            const geo = new THREE.BoxGeometry(1, 1, 1);
-            const grassMat = new THREE.MeshLambertMaterial({ color: 0x559944 });
-            const woodMat = new THREE.MeshLambertMaterial({ color: 0x5d3a1a });
-            const leafMat = new THREE.MeshLambertMaterial({ color: 0x2d5a27 });
-
-            for(let x = -8; x <= 8; x++) {
-                for(let z = -8; z <= 8; z++) {
-                    const block = new THREE.Mesh(geo, grassMat);
-                    block.position.set(x, 0, z);
-                    scene.add(block);
-                }
-            }
-
-            // Baum bauen
-            for(let y=1; y<=3; y++) {
-                const trunk = new THREE.Mesh(geo, woodMat); trunk.position.set(3, y, 3); trunk.userData.type = "wood"; scene.add(trunk);
-            }
-            const crown = new THREE.Mesh(geo, leafMat); crown.position.set(3, 4, 3); scene.add(crown);
-
-            // Schafe generieren
-            for(let i=0; i<3; i++) spawnSheep();
-
-            camera.position.set(0, 1.7, 0);
-            setupControls();
-            animate();
-        }
-
-        function spawnSheep() {
-            const sheep = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.8), new THREE.MeshLambertMaterial({color: 0xffffff}));
-            sheep.position.set(Math.random()*10-5, 1, Math.random()*10-5);
-            sheep.userData = { health: 3, nextMove: 0, dir: new THREE.Vector3() };
-            scene.add(sheep);
-            animals.push(sheep);
-        }
-
-        function setupControls() {
-            const bind = (id, key) => {
-                const el = document.getElementById(id);
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); move[key] = true; });
-                el.addEventListener('touchend', () => move[key] = false);
-            };
-            bind('move-f', 'f'); bind('move-b', 'b'); bind('move-l', 'l'); bind('move-r', 'r');
-            
-            document.getElementById('jump-btn').onclick = () => { if(camera.position.y <= 1.71) velocity.y = 0.15; };
-
-            // Kamera & Interaktion
-            let lastX, lastY;
-            window.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                if(touch.clientX > window.innerWidth / 2) {
-                    lastX = touch.clientX; lastY = touch.clientY;
-                    checkHit(touch);
-                }
-            });
-
-            window.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                if(touch.clientX > window.innerWidth / 2 && lastX !== undefined) {
-                    rotation.yaw -= (touch.clientX - lastX) * 0.007;
-                    rotation.pitch -= (touch.clientY - lastY) * 0.007;
-                    rotation.pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, rotation.pitch));
-                    lastX = touch.clientX; lastY = touch.clientY;
-                }
-            });
-        }
-
-        function checkHit(touch) {
-            const mouse = new THREE.Vector2(0, 0); // Mitte des Bildschirms (Crosshair)
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(animals);
-            
-            if(intersects.length > 0) {
-                const s = intersects[0].object;
-                s.material.color.set(0xff0000);
-                s.position.y += 0.3;
-                s.userData.health--;
-                setTimeout(() => s.material.color.set(0xffffff), 200);
-                
-                if(s.userData.health <= 0) {
-                    const drop = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2), new THREE.MeshLambertMaterial({color: 0xaa4444}));
-                    drop.position.copy(s.position);
-                    scene.add(drop);
-                    scene.remove(s);
-                    animals = animals.filter(a => a !== s);
-                }
-            }
-        }
-
-        function animate() {
-            if(isPaused) return;
-            requestAnimationFrame(animate);
-
-            camera.rotation.order = 'YXZ';
-            camera.rotation.y = rotation.yaw;
-            camera.rotation.x = rotation.pitch;
-
-            const speed = 0.08;
-            if (move.f) camera.translateZ(-speed);
-            if (move.b) camera.translateZ(speed);
-            if (move.l) camera.translateX(-speed);
-            if (move.r) camera.translateX(speed);
-
-            // Gravity
-            camera.position.y += velocity.y;
-            if(camera.position.y > 1.7) velocity.y -= 0.01;
-            else { camera.position.y = 1.7; velocity.y = 0; }
-
-            // Schafe KI
-            animals.forEach(s => {
-                if(Date.now() > s.userData.nextMove) {
-                    s.userData.dir.set(Math.random()-0.5, 0, Math.random()-0.5).normalize();
-                    s.userData.nextMove = Date.now() + 2000;
-                }
-                s.position.addScaledVector(s.userData.dir, 0.02);
-                s.position.x = Math.max(-7, Math.min(7, s.position.x));
-                s.position.z = Math.max(-7, Math.min(7, s.position.z));
-            });
-
-            renderer.render(scene, camera);
-        }
-
-        function togglePause() {
-            isPaused = !isPaused;
-            document.getElementById('pause-overlay').style.display = isPaused ? 'flex' : 'none';
-            if(!isPaused) animate();
-        }
-
-        // DEINE MENÜ FUNKTIONEN
-        function openOverlay(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        function toggleBtn(btn) { btn.innerText = (btn.innerText === 'ON') ? 'OFF' : 'ON'; }
-        function changeShirt(c) { document.getElementById('shirt').setAttribute('fill', c); }
-        function saveSettings() { closeOverlay('settings-overlay'); }
-    </script>
 </body>
 </html>
