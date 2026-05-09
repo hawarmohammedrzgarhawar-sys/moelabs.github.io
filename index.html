@@ -2,364 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON DRIFT 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxelBound - Menu</title>
     <style>
-        :root {
-            --neon-cyan: #00f2ff;
-            --neon-pink: #ff00ea;
-            --neon-yellow: #fbff00;
-            --bg: #050505;
-        }
-
-        * { box-sizing: border-box; touch-action: none; user-select: none; }
+        /* Minecraft-Style Schriftart-Ersatz */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: white; overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Press Start 2P', cursive;
+            color: white;
+            /* Ein dunkler Wald-Hintergrund als Platzhalter */
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://img.freepik.com/free-photo/view-mysterious-forest-with-fog_23-2150774614.jpg?size=626&ext=jpg');
+            background-size: cover;
+            background-position: center;
         }
 
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        #ui-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
         }
-
-        /* Branding */
-        .brand-top-right {
-            position: absolute; top: 20px; right: 20px;
-            color: var(--neon-cyan); font-weight: bold; letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--neon-cyan); font-size: 1.2rem;
-        }
-
-        .version-right {
-            position: absolute; right: 20px; top: 50%;
-            transform: rotate(90deg) translateX(50%);
-            color: rgba(255,255,255,0.3); font-size: 0.8rem;
-        }
-
-        /* Menus */
-        .menu-screen {
-            display: none; flex-direction: column; align-items: center;
-            justify-content: center; height: 100%; width: 100%;
-            background: rgba(0,0,0,0.9);
-        }
-
-        .active { display: flex; }
 
         h1 {
-            font-size: clamp(3rem, 10vw, 5rem);
-            margin-bottom: 2rem; color: white;
-            text-shadow: 0 0 20px var(--neon-pink);
-            text-transform: uppercase; text-align: center;
+            font-size: 3rem;
+            text-shadow: 4px 4px #333;
+            margin-bottom: 50px;
+            color: #ccc;
         }
 
-        .btn {
-            background: transparent; border: 2px solid white;
-            color: white; padding: 15px 40px; margin: 10px;
-            font-size: 1.2rem; cursor: pointer; min-width: 200px;
-            transition: 0.2s; text-transform: uppercase; font-weight: bold;
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 300px;
         }
 
-        .btn:hover { background: white; color: black; box-shadow: 0 0 20px white; }
-
-        /* HUD */
-        #hud {
-            position: absolute; top: 20px; left: 20px;
-            pointer-events: none; display: none;
+        button {
+            background-color: #777;
+            border: 3px solid #000;
+            color: white;
+            padding: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: inset -4px -4px #444, inset 4px 4px #aaa;
         }
 
-        .stat-line { font-size: 1.5rem; margin-bottom: 5px; font-weight: bold; }
-
-        /* Settings */
-        .settings-row {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 300px; margin: 15px 0; font-size: 1.2rem;
+        button:hover {
+            background-color: #888;
+            border-color: white;
         }
 
-        input[type="checkbox"] { width: 25px; height: 25px; cursor: pointer; }
+        /* Charakter-Bereich rechts */
+        #character-preview {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        canvas { display: block; filter: blur(0px); transition: filter 0.3s; }
-        .paused canvas { filter: blur(5px); }
+        .pixel-char {
+            width: 100px;
+            height: 180px;
+            background-color: #3498db; /* Platzhalter Skin-Farbe */
+            border: 4px solid #222;
+            margin-bottom: 10px;
+        }
+
+        /* Info-Texte unten */
+        .footer-left {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            font-size: 10px;
+        }
+
+        .footer-right {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 10px;
+        }
+
+        /* Mobile Controls Simulation */
+        #mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+        }
+
+        .touch-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div class="brand-top-right">MADE BY MOE</div>
-        <div class="version-right">VER. 2.0.4-STABLE</div>
+    <div id="ui-container">
+        <h1>VOXELBOUND</h1>
 
-        <div id="main-menu" class="menu-screen active">
-            <h1>Neon Drift</h1>
-            <button class="btn" onclick="game.start()">Start Game</button>
-            <button class="btn" onclick="ui.showSettings()">Settings</button>
+        <div class="menu-buttons">
+            <button onclick="startGame()">Play</button>
+            <button onclick="openSettings()">Settings</button>
         </div>
 
-        <div id="settings-menu" class="menu-screen">
-            <h1>Settings</h1>
-            <div class="settings-row">
-                <span>Music</span>
-                <input type="checkbox" id="music-toggle" checked>
-            </div>
-            <div class="settings-row">
-                <span>SFX</span>
-                <input type="checkbox" id="sfx-toggle" checked>
-            </div>
-            <button class="btn" onclick="ui.showMain()">Back</button>
+        <div id="character-preview">
+            <span>MOE</span>
+            <div class="pixel-char"></div>
+            <button style="width: 150px; font-size: 10px;">Dressing Room</button>
         </div>
 
-        <div id="game-over" class="menu-screen">
-            <h1 style="color: var(--neon-pink)">Crashed</h1>
-            <p id="final-stats" style="font-size: 1.5rem; margin-bottom: 2rem;"></p>
-            <button class="btn" onclick="game.start()">Try Again</button>
-            <button class="btn" onclick="ui.showMain()">Menu</button>
+        <div class="footer-left">
+            Made by MOE 2026
         </div>
 
-        <div id="hud">
-            <div class="stat-line" style="color: var(--neon-cyan)">Score: <span id="score-val">0</span></div>
-            <div class="stat-line" style="color: var(--neon-yellow)">Coins: <span id="coin-val">0</span></div>
-            <div class="stat-line" style="color: var(--neon-pink)">Level: <span id="level-val">1</span></div>
+        <div class="footer-right">
+            v0.0.1 ALPHA
         </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <div id="mobile-controls">
+        <div class="touch-btn"></div>
+    </div>
 
-<script>
-/** * AUDIO SYSTEM (Synthesized)
- */
-const audio = {
-    ctx: null,
-    init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    playJump() {
-        if(!document.getElementById('sfx-toggle').checked) return;
-        this.init();
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.1);
-    },
-    playCoin() {
-        if(!document.getElementById('sfx-toggle').checked) return;
-        this.init();
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.2);
-    },
-    playCrash() {
-        if(!document.getElementById('sfx-toggle').checked) return;
-        this.init();
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(20, this.ctx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.5);
-    }
-};
-
-/**
- * UI CONTROLLER
- */
-const ui = {
-    showScreen(id) {
-        document.querySelectorAll('.menu-screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('hud').style.display = (id === 'hud') ? 'block' : 'none';
-    },
-    showSettings() { this.showScreen('settings-menu'); },
-    showMain() { this.showScreen('main-menu'); },
-    showGameOver(score, coins) {
-        document.getElementById('final-stats').innerText = `Score: ${score} | Coins: ${coins}`;
-        this.showScreen('game-over');
-    }
-};
-
-/**
- * GAME ENGINE
- */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-const game = {
-    active: false,
-    score: 0,
-    coins: 0,
-    level: 1,
-    speed: 6,
-    player: null,
-    obstacles: [],
-    tokens: [],
-    
-    init() {
-        window.addEventListener('resize', () => this.resize());
-        this.resize();
-        
-        // Input
-        window.addEventListener('keydown', (e) => { if(e.code === 'Space') this.jump(); });
-        window.addEventListener('touchstart', (e) => { e.preventDefault(); this.jump(); });
-    },
-
-    resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    },
-
-    start() {
-        this.score = 0;
-        this.coins = 0;
-        this.level = 1;
-        this.speed = 7;
-        this.obstacles = [];
-        this.tokens = [];
-        this.player = {
-            x: 80, y: canvas.height - 100, w: 40, h: 40,
-            dy: 0, jumpPower: -16, gravity: 0.8, grounded: false
-        };
-        this.active = true;
-        ui.showScreen('hud');
-        this.loop();
-    },
-
-    jump() {
-        if(!this.active) return;
-        if(this.player.grounded) {
-            this.player.dy = this.player.jumpPower;
-            this.player.grounded = false;
-            audio.playJump();
-        }
-    },
-
-    update() {
-        if(!this.active) return;
-
-        // Player physics
-        this.player.dy += this.player.gravity;
-        this.player.y += this.player.dy;
-
-        const groundY = canvas.height - 80;
-        if(this.player.y + this.player.h > groundY) {
-            this.player.y = groundY - this.player.h;
-            this.player.dy = 0;
-            this.player.grounded = true;
+    <script>
+        function startGame() {
+            alert("Starting VoxelBound...");
         }
 
-        // Spawn logic
-        if(Math.random() < 0.015) this.spawnObstacle();
-        if(Math.random() < 0.01) this.spawnToken();
-
-        // Object movement
-        [...this.obstacles, ...this.tokens].forEach(obj => obj.x -= this.speed);
-
-        // Collisions
-        this.obstacles.forEach((o, i) => {
-            if(this.checkRect(this.player, o)) this.die();
-            if(o.x < -100) this.obstacles.splice(i, 1);
-        });
-
-        this.tokens.forEach((t, i) => {
-            if(this.checkRect(this.player, t)) {
-                this.coins++;
-                this.score += 50;
-                audio.playCoin();
-                this.tokens.splice(i, 1);
+        function openSettings() {
+            let mode = prompt("Choose Mode: PC or Mobile").toLowerCase();
+            if(mode === "mobile") {
+                document.getElementById('mobile-controls').style.display = 'block';
+                alert("Mobile Buttons activated!");
+            } else {
+                document.getElementById('mobile-controls').style.display = 'none';
+                alert("PC Mode: Keyboard active.");
             }
-            if(t.x < -100) this.tokens.splice(i, 1);
-        });
-
-        // Progression
-        this.score++;
-        if(this.score % 1000 === 0) {
-            this.level++;
-            this.speed += 0.5;
         }
-
-        // UI Update
-        document.getElementById('score-val').innerText = Math.floor(this.score);
-        document.getElementById('coin-val').innerText = this.coins;
-        document.getElementById('level-val').innerText = this.level;
-    },
-
-    draw() {
-        ctx.fillStyle = '#050505';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Grid background
-        ctx.strokeStyle = '#111';
-        for(let i=0; i<canvas.width; i+=40) {
-            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-        }
-
-        // Ground
-        ctx.fillStyle = '#111';
-        ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
-        ctx.strokeStyle = varColor('--neon-cyan');
-        ctx.lineWidth = 4;
-        ctx.strokeRect(-10, canvas.height - 80, canvas.width+20, 5);
-
-        // Player
-        ctx.shadowBlur = 15; ctx.shadowColor = varColor('--neon-cyan');
-        ctx.fillStyle = varColor('--neon-cyan');
-        ctx.fillRect(this.player.x, this.player.y, this.player.w, this.player.h);
-
-        // Obstacles
-        ctx.shadowColor = varColor('--neon-pink');
-        ctx.fillStyle = varColor('--neon-pink');
-        this.obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
-
-        // Tokens
-        ctx.shadowColor = varColor('--neon-yellow');
-        ctx.fillStyle = varColor('--neon-yellow');
-        this.tokens.forEach(t => {
-            ctx.beginPath(); ctx.arc(t.x+t.w/2, t.y+t.h/2, t.w/2, 0, Math.PI*2); ctx.fill();
-        });
-        
-        ctx.shadowBlur = 0;
-    },
-
-    spawnObstacle() {
-        let h = 30 + Math.random() * 40;
-        this.obstacles.push({ x: canvas.width, y: canvas.height - 80 - h, w: 30, h: h });
-    },
-
-    spawnToken() {
-        this.tokens.push({ x: canvas.width, y: canvas.height - 150 - Math.random()*100, w: 15, h: 15 });
-    },
-
-    checkRect(r1, r2) {
-        return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y;
-    },
-
-    die() {
-        this.active = false;
-        audio.playCrash();
-        ui.showGameOver(Math.floor(this.score), this.coins);
-    },
-
-    loop() {
-        if(!this.active) return;
-        this.update();
-        this.draw();
-        requestAnimationFrame(() => this.loop());
-    }
-};
-
-function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-
-game.init();
-</script>
+    </script>
 </body>
 </html>
