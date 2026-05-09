@@ -3,250 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxelBound - Alpha</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Retro Snake - Responsive</title>
     <style>
-        :root {
-            --mc-button-gray: #AAAAAA;
-            --mc-button-border-dark: #555555;
-            --mc-button-border-light: #FFFFFF;
-            --mc-font-shadow: 2px 2px #3f3f3f;
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none; /* Prevents scrolling while playing */
         }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; font-family: 'Courier New', Courier, monospace;
-            background: #000; touch-action: none;
+        canvas {
+            border: 5px solid #ecf0f1;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #000;
+            max-width: 90vw;
+            max-height: 70vh;
         }
-
-        /* MENU STYLES (Heilig - unangetastet) */
-        #menu-container {
-            position: fixed; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0, 0, 0, 0.4) url('https://minecraft.wiki/images/Pan_Background_1.17.png') no-repeat center center;
-            background-size: cover; z-index: 10;
+        .stats {
+            margin-bottom: 10px;
+            font-size: 24px;
         }
-
-        .title { font-size: 3rem; color: #FFFFFF; text-shadow: 4px 4px #3f3f3f; margin-bottom: 40px; text-align: center; }
-        .mc-button {
-            width: 300px; max-width: 80%; height: 45px; background-color: var(--mc-button-gray);
-            border: 3px solid var(--mc-button-border-dark); border-top-color: var(--mc-button-border-light);
-            border-left-color: var(--mc-button-border-light); color: white; font-size: 1.2rem;
-            text-shadow: var(--mc-font-shadow); margin: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        .controls-hint {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #bdc3c7;
+            text-align: center;
         }
-
-        /* INGAME UI */
-        #game-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 20px; height: 20px; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center;
-        }
-        
-        /* Mobile Steuerung */
-        #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 150px; height: 150px; pointer-events: auto; }
-        #jump-btn {
-            position: absolute; bottom: 40px; right: 40px; width: 70px; height: 70px;
-            background: rgba(255,255,255,0.2); border: 3px solid white; border-radius: 50%;
-            pointer-events: auto; color: white; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; user-select: none;
-        }
-
-        #settings-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 100; flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        .version-tag { position: absolute; bottom: 10px; left: 10px; color: white; }
-        .credits { position: absolute; bottom: 10px; right: 10px; color: white; }
-
-        canvas { display: block; }
     </style>
 </head>
 <body>
 
-<div id="menu-container">
-    <h1 class="title">VOXELBOUND</h1>
-    <button class="mc-button" onclick="startGame()">PLAY</button>
-    <button class="mc-button" onclick="toggleSettings(true)">SETTINGS</button>
-    
-    <div style="position: absolute; right: 10%; bottom: 15%; text-align: center;">
-        <p id="display-name" style="color: white; text-shadow: 2px 2px #000;">Player</p>
-        <svg id="steve-svg" width="100" viewBox="0 0 8 8">
-            <rect id="steve-body" x="2" y="0" width="4" height="8" fill="#5A5A5A" />
-            <rect x="2" y="0" width="4" height="4" fill="#ffdbac" />
-        </svg>
-        <button class="mc-button" style="width: 150px; font-size: 0.8rem;" onclick="changeColor()">DRESS ROOM</button>
+    <div class="stats">Score: <span id="scoreVal">0</span></div>
+    <canvas id="snakeGame" width="400" height="400"></canvas>
+    <div class="controls-hint">
+        Desktop: Use Arrow Keys<br>
+        Mobile/Tablet: Swipe to Turn
     </div>
 
-    <div class="version-tag">v1.1.2</div>
-    <div class="credits">Made by Mo MOE</div>
-</div>
+    <script>
+        const canvas = document.getElementById("snakeGame");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("scoreVal");
 
-<div id="settings-screen">
-    <h2 style="color: white;">SETTINGS</h2>
-    <button id="btn-music" class="mc-button" onclick="toggleOption('music')">Music: ON</button>
-    <button id="btn-sound" class="mc-button" onclick="toggleOption('sound')">Sound: ON</button>
-    <input type="text" id="name-input" placeholder="Change Name..." oninput="updateName()" style="background:#000; color:#fff; border:2px solid #fff; padding:10px; margin:10px;">
-    <button class="mc-button" onclick="toggleSettings(false)">BACK</button>
-</div>
+        const box = 20; // Size of one square
+        let score = 0;
+        let gameSpeed = 100;
 
-<div id="game-ui">
-    <div id="crosshair">+</div>
-    <div id="joystick-zone"></div>
-    <div id="jump-btn">JUMP</div>
-</div>
+        let snake = [{ x: 10 * box, y: 10 * box }];
+        let food = {
+            x: Math.floor(Math.random() * 19 + 1) * box,
+            y: Math.floor(Math.random() * 19 + 1) * box
+        };
 
-<script>
-    let scene, camera, renderer, clock;
-    let config = { music: true, sound: true, version: "1.1.2", playerColor: "#5A5A5A" };
-    
-    // Player State
-    let velocity = new THREE.Vector3();
-    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-    let canJump = true;
-    let pitch = 0, yaw = 0;
+        let d; // Direction
 
-    // Schafe
-    let sheeps = [];
+        // 1. KEYBOARD CONTROLS (PC/Laptop)
+        document.addEventListener("keydown", direction);
+        function direction(event) {
+            let key = event.keyCode;
+            if(key == 37 && d != "RIGHT") d = "LEFT";
+            else if(key == 38 && d != "DOWN") d = "UP";
+            else if(key == 39 && d != "LEFT") d = "RIGHT";
+            else if(key == 40 && d != "UP") d = "DOWN";
+        }
 
-    // --- MENU FUNKTIONEN ---
-    function toggleSettings(show) { document.getElementById('settings-screen').style.display = show ? 'flex' : 'none'; }
-    function toggleOption(type) { 
-        config[type] = !config[type]; 
-        document.getElementById(`btn-${type}`).innerText = `${type.toUpperCase()}: ${config[type] ? 'ON' : 'OFF'}`; 
-    }
-    function updateName() { document.getElementById('display-name').innerText = document.getElementById('name-input').value || "Player"; }
-    function changeColor() {
-        const colors = ["#5A5A5A", "#3498db", "#e74c3c", "#2ecc71", "#f1c40f"];
-        config.playerColor = colors[Math.floor(Math.random() * colors.length)];
-        document.getElementById('steve-body').setAttribute('fill', config.playerColor);
-    }
+        // 2. TOUCH CONTROLS (iPad/Mobile)
+        let touchstartX = 0;
+        let touchstartY = 0;
+        let touchendX = 0;
+        let touchendY = 0;
 
-    // --- GAME ENGINE ---
-    function startGame() {
-        document.getElementById('menu-container').style.display = 'none';
-        document.getElementById('game-ui').style.display = 'block';
-        initGame();
-    }
+        document.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+            touchstartY = e.changedTouches[0].screenY;
+        });
 
-    function initGame() {
-        clock = new THREE.Clock();
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        
-        renderer = new THREE.WebGLRenderer({ antialias: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            touchendY = e.changedTouches[0].screenY;
+            handleGesture();
+        });
 
-        const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-        scene.add(light);
+        function handleGesture() {
+            let dx = touchendX - touchstartX;
+            let dy = touchendY - touchstartY;
 
-        // Boden 16x16
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshLambertMaterial({ color: 0x4d9043 });
-        for(let x = 0; x < 16; x++) {
-            for(let z = 0; z < 16; z++) {
-                const block = new THREE.Mesh(geometry, material);
-                block.position.set(x - 8, -1, z - 8);
-                scene.add(block);
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0 && d != "LEFT") d = "RIGHT";
+                else if (dx < 0 && d != "RIGHT") d = "LEFT";
+            } else {
+                if (dy > 0 && d != "UP") d = "DOWN";
+                else if (dy < 0 && d != "DOWN") d = "UP";
             }
         }
 
-        // Schafe hinzufügen
-        const sheepGeo = new THREE.BoxGeometry(0.6, 0.6, 0.8);
-        const sheepMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-        for(let i = 0; i < 3; i++) {
-            let sheep = new THREE.Mesh(sheepGeo, sheepMat);
-            sheep.position.set(Math.random()*10-5, 0.3, Math.random()*10-5);
-            sheep.userData = { dir: new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize() };
-            scene.add(sheep);
-            sheeps.push(sheep);
+        // Collision Check
+        function collision(head, array) {
+            for(let i = 0; i < array.length; i++) {
+                if(head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
         }
 
-        setupControls();
-        animate();
-    }
+        // Main Draw Function
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function setupControls() {
-        // Umsehen (Rechte Seite)
-        window.addEventListener('touchmove', (e) => {
-            if (e.touches[0].pageX > window.innerWidth / 2) {
-                let touch = e.touches[0];
-                yaw -= (touch.deltaX || 0) * 0.005; 
-                // Einfacher Swipe-Look (deltaX manuell berechnen für bessere Kompatibilität)
+            for(let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
             }
-        });
 
-        // Provisorische Swipe-Logik für Kamera
-        let lastX, lastY;
-        window.addEventListener('touchstart', e => {
-            lastX = e.touches[0].pageX;
-            lastY = e.touches[0].pageY;
-        });
-        window.addEventListener('touchmove', e => {
-            let touch = e.touches[0];
-            if (touch.pageX > window.innerWidth / 2) {
-                let dx = touch.pageX - lastX;
-                let dy = touch.pageY - lastY;
-                yaw -= dx * 0.005;
-                pitch -= dy * 0.005;
-                pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
+            // Draw Food
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(food.x, food.y, box, box);
+
+            // Old head position
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            // Move direction
+            if( d == "LEFT") snakeX -= box;
+            if( d == "UP") snakeY -= box;
+            if( d == "RIGHT") snakeX += box;
+            if( d == "DOWN") snakeY += box;
+
+            // Eat Food
+            if(snakeX == food.x && snakeY == food.y) {
+                score++;
+                scoreElement.innerHTML = score;
+                food = {
+                    x: Math.floor(Math.random() * 19 + 1) * box,
+                    y: Math.floor(Math.random() * 19 + 1) * box
+                };
+            } else {
+                snake.pop(); // Remove tail
             }
-            lastX = touch.pageX;
-            lastY = touch.pageY;
-        });
 
-        // Joystick (Linke Seite)
-        const joyZone = document.getElementById('joystick-zone');
-        joyZone.addEventListener('touchstart', () => moveForward = true);
-        joyZone.addEventListener('touchend', () => moveForward = false);
+            let newHead = { x: snakeX, y: snakeY };
 
-        // Jump
-        const jBtn = document.getElementById('jump-btn');
-        jBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(canJump) {
-                velocity.y = 0.15;
-                canJump = false;
+            // Game Over rules
+            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                alert("Game Over! Score: " + score);
+                location.reload(); // Restart
             }
-        });
-    }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        let delta = clock.getDelta();
-
-        // Kamera Rotation
-        camera.rotation.set(pitch, yaw, 0, 'YXZ');
-
-        // Bewegung
-        if (moveForward) {
-            camera.translateZ(-0.1);
-        }
-        
-        // Gravitation & Jump
-        velocity.y -= 0.008; 
-        camera.position.y += velocity.y;
-        if (camera.position.y <= 1.6) {
-            camera.position.y = 1.6;
-            velocity.y = 0;
-            canJump = true;
+            snake.unshift(newHead);
         }
 
-        // Map Grenzen (16x16)
-        camera.position.x = Math.max(-7.5, Math.min(7.5, camera.position.x));
-        camera.position.z = Math.max(-7.5, Math.min(7.5, camera.position.z));
+        let game = setInterval(draw, gameSpeed);
 
-        // Schafe KI
-        sheeps.forEach(s => {
-            s.position.addScaledVector(s.userData.dir, 0.02);
-            if (Math.abs(s.position.x) > 7 || Math.abs(s.position.z) > 7) s.userData.dir.negate();
-            if (Math.random() > 0.98) s.userData.dir.set(Math.random()-0.5, 0, Math.random()-0.5).normalize();
-        });
-
-        renderer.render(scene, camera);
-    }
-</script>
+    </script>
 </body>
 </html>
