@@ -13,7 +13,6 @@
             background: #111; color: white;
         }
 
-        /* --- HAUPTMENÜ (UNVERÄNDERT) --- */
         #game-menu {
             display: flex; flex-direction: row; align-items: center; justify-content: center; 
             height: 100vh; width: 100vw; gap: 60px;
@@ -36,58 +35,16 @@
             cursor: pointer; box-shadow: inset -3px -3px #222, inset 3px 3px #888;
         }
 
-        /* --- DER NEUE STEVE (GENAU NACH BILD) --- */
-        #char-section { display: flex; flex-direction: column; align-items: center; gap: 15px; position: relative; }
-
-        .steve-container {
-            width: 80px; height: 160px;
-            position: relative;
-            image-rendering: pixelated;
+        /* --- STEVE ALS SAUBERES SVG --- */
+        #char-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        
+        .steve-svg {
+            width: 100px; height: 180px;
+            filter: drop-shadow(4px 4px 0px #000);
         }
 
-        /* Kopf */
-        .steve-head {
-            width: 40px; height: 40px;
-            background: #d1a083; /* Hautfarbe */
-            position: absolute; left: 20px; top: 0;
-            border: 3px solid #000;
-            box-shadow: 
-                inset 0 10px 0 #5b3927, /* Haare oben */
-                inset 8px 18px 0 #fff, inset 12px 18px 0 #6e50c4, /* Auge links */
-                inset 24px 18px 0 #fff, inset 28px 18px 0 #6e50c4, /* Auge rechts */
-                inset 14px 28px 0 #7b4d35; /* Nase/Bart */
-        }
+        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
 
-        /* Körper */
-        .steve-body {
-            width: 40px; height: 50px;
-            background: #00b9d1; /* Cyan Shirt */
-            position: absolute; left: 20px; top: 43px;
-            border: 3px solid #000;
-        }
-
-        /* Arme */
-        .steve-arm-l, .steve-arm-r {
-            width: 18px; height: 50px;
-            background: #00b9d1;
-            position: absolute; top: 43px;
-            border: 3px solid #000;
-        }
-        .steve-arm-l { left: -1px; border-right: none; }
-        .steve-arm-r { left: 63px; border-left: none; }
-
-        /* Beine */
-        .steve-legs {
-            width: 40px; height: 55px;
-            background: #4a4abf; /* Lila-Blaue Hose */
-            position: absolute; left: 20px; top: 96px;
-            border: 3px solid #000;
-            box-shadow: inset 0 -10px 0 #333; /* Schuhe */
-        }
-
-        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; margin-top: 10px; }
-
-        /* --- SETTINGS (UNVERÄNDERT) --- */
         #settings-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 20, 20, 0.95); z-index: 100;
@@ -117,13 +74,21 @@
         </div>
 
         <div id="char-section">
-            <div class="steve-container">
-                <div class="steve-arm-l"></div>
-                <div class="steve-head"></div>
-                <div class="steve-body"></div>
-                <div class="steve-arm-r"></div>
-                <div class="steve-legs"></div>
-            </div>
+            <svg class="steve-svg" viewBox="0 0 80 140" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="90" width="40" height="50" fill="#4a4abf" stroke="#000" stroke-width="2"/>
+                <rect x="20" y="130" width="40" height="10" fill="#333"/>
+                <rect x="2" y="40" width="18" height="50" fill="#00b9d1" stroke="#000" stroke-width="2"/>
+                <rect x="60" y="40" width="18" height="50" fill="#00b9d1" stroke="#000" stroke-width="2"/>
+                <rect x="20" y="40" width="40" height="52" fill="#00b9d1" stroke="#000" stroke-width="2"/>
+                <rect x="20" y="0" width="40" height="40" fill="#d1a083" stroke="#000" stroke-width="2"/>
+                <rect x="20" y="0" width="40" height="10" fill="#5b3927"/>
+                <rect x="26" y="18" width="6" height="4" fill="#fff"/>
+                <rect x="29" y="18" width="3" height="4" fill="#6e50c4"/>
+                <rect x="48" y="18" width="6" height="4" fill="#fff"/>
+                <rect x="48" y="18" width="3" height="4" fill="#6e50c4"/>
+                <rect x="34" y="26" width="12" height="4" fill="#7b4d35"/>
+            </svg>
+            
             <div id="player-name-display">Player</div>
             <button onclick="alert('Soon!')" style="width: 130px; font-size: 7px; padding: 5px;">Dressing Room</button>
         </div>
