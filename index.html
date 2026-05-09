@@ -16,7 +16,7 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; font-family: 'Courier New', Courier, monospace;
-            background: #000;
+            background: #000; touch-action: none;
         }
 
         /* MENU STYLES (Heilig - unangetastet) */
@@ -39,18 +39,16 @@
         #game-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         #crosshair {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 20px; height: 20px; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center;
         }
         
         /* Mobile Steuerung */
-        #joystick-area {
-            position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px;
-            background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto;
-        }
+        #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 150px; height: 150px; pointer-events: auto; }
         #jump-btn {
-            position: absolute; bottom: 40px; right: 40px; width: 60px; height: 60px;
-            background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 10px;
+            position: absolute; bottom: 40px; right: 40px; width: 70px; height: 70px;
+            background: rgba(255,255,255,0.2); border: 3px solid white; border-radius: 50%;
             pointer-events: auto; color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; user-select: none;
         }
 
         #settings-screen {
@@ -94,13 +92,22 @@
 
 <div id="game-ui">
     <div id="crosshair">+</div>
-    <div id="joystick-area"></div>
+    <div id="joystick-zone"></div>
     <div id="jump-btn">JUMP</div>
 </div>
 
 <script>
-    let scene, camera, renderer, moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let scene, camera, renderer, clock;
     let config = { music: true, sound: true, version: "1.1.2", playerColor: "#5A5A5A" };
+    
+    // Player State
+    let velocity = new THREE.Vector3();
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let canJump = true;
+    let pitch = 0, yaw = 0;
+
+    // Schafe
+    let sheeps = [];
 
     // --- MENU FUNKTIONEN ---
     function toggleSettings(show) { document.getElementById('settings-screen').style.display = show ? 'flex' : 'none'; }
@@ -123,22 +130,21 @@
     }
 
     function initGame() {
+        clock = new THREE.Clock();
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+        scene.background = new THREE.Color(0x87CEEB);
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         
         renderer = new THREE.WebGLRenderer({ antialias: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Licht
         const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
         scene.add(light);
 
-        // 16x16 Welt Generierung
+        // Boden 16x16
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshLambertMaterial({ color: 0x4d9043 }); // Gras Grün
-
+        const material = new THREE.MeshLambertMaterial({ color: 0x4d9043 });
         for(let x = 0; x < 16; x++) {
             for(let z = 0; z < 16; z++) {
                 const block = new THREE.Mesh(geometry, material);
@@ -147,26 +153,100 @@
             }
         }
 
-        camera.position.set(0, 1.6, 0); // Augenhöhe
+        // Schafe hinzufügen
+        const sheepGeo = new THREE.BoxGeometry(0.6, 0.6, 0.8);
+        const sheepMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+        for(let i = 0; i < 3; i++) {
+            let sheep = new THREE.Mesh(sheepGeo, sheepMat);
+            sheep.position.set(Math.random()*10-5, 0.3, Math.random()*10-5);
+            sheep.userData = { dir: new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize() };
+            scene.add(sheep);
+            sheeps.push(sheep);
+        }
+
+        setupControls();
         animate();
+    }
+
+    function setupControls() {
+        // Umsehen (Rechte Seite)
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches[0].pageX > window.innerWidth / 2) {
+                let touch = e.touches[0];
+                yaw -= (touch.deltaX || 0) * 0.005; 
+                // Einfacher Swipe-Look (deltaX manuell berechnen für bessere Kompatibilität)
+            }
+        });
+
+        // Provisorische Swipe-Logik für Kamera
+        let lastX, lastY;
+        window.addEventListener('touchstart', e => {
+            lastX = e.touches[0].pageX;
+            lastY = e.touches[0].pageY;
+        });
+        window.addEventListener('touchmove', e => {
+            let touch = e.touches[0];
+            if (touch.pageX > window.innerWidth / 2) {
+                let dx = touch.pageX - lastX;
+                let dy = touch.pageY - lastY;
+                yaw -= dx * 0.005;
+                pitch -= dy * 0.005;
+                pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
+            }
+            lastX = touch.pageX;
+            lastY = touch.pageY;
+        });
+
+        // Joystick (Linke Seite)
+        const joyZone = document.getElementById('joystick-zone');
+        joyZone.addEventListener('touchstart', () => moveForward = true);
+        joyZone.addEventListener('touchend', () => moveForward = false);
+
+        // Jump
+        const jBtn = document.getElementById('jump-btn');
+        jBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if(canJump) {
+                velocity.y = 0.15;
+                canJump = false;
+            }
+        });
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        // Hier kommt später die Bewegungs-Logik rein
+        let delta = clock.getDelta();
+
+        // Kamera Rotation
+        camera.rotation.set(pitch, yaw, 0, 'YXZ');
+
+        // Bewegung
+        if (moveForward) {
+            camera.translateZ(-0.1);
+        }
+        
+        // Gravitation & Jump
+        velocity.y -= 0.008; 
+        camera.position.y += velocity.y;
+        if (camera.position.y <= 1.6) {
+            camera.position.y = 1.6;
+            velocity.y = 0;
+            canJump = true;
+        }
+
+        // Map Grenzen (16x16)
+        camera.position.x = Math.max(-7.5, Math.min(7.5, camera.position.x));
+        camera.position.z = Math.max(-7.5, Math.min(7.5, camera.position.z));
+
+        // Schafe KI
+        sheeps.forEach(s => {
+            s.position.addScaledVector(s.userData.dir, 0.02);
+            if (Math.abs(s.position.x) > 7 || Math.abs(s.position.z) > 7) s.userData.dir.negate();
+            if (Math.random() > 0.98) s.userData.dir.set(Math.random()-0.5, 0, Math.random()-0.5).normalize();
+        });
+
         renderer.render(scene, camera);
     }
-
-    // Mobile Fixes
-    window.addEventListener('resize', () => {
-        if(camera) {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-    });
-
-    document.addEventListener('touchmove', (e) => { if (e.scale !== 1) e.preventDefault(); }, { passive: false });
 </script>
 </body>
 </html>
