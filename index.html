@@ -2,96 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoxelBound</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-        /* Basis-Setup für Vollbild */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; font-family: 'Press Start 2P', cursive;
-            background: #222; color: white;
-            image-rendering: pixelated; /* Für den Retro-Look */
+            background: #111; color: white;
         }
 
-        /* Hintergrund-Design */
         #game-menu {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100vh; width: 100vw;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+            display: flex; 
+            flex-direction: row; /* Buttons und Char nebeneinander */
+            align-items: center;
+            justify-content: center; 
+            height: 100vh; 
+            width: 100vw;
+            gap: 50px; /* Abstand zwischen Menü und Charakter */
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
         }
 
-        h1 { font-size: 2rem; text-shadow: 4px 4px #000; margin-bottom: 30px; color: #eee; }
+        /* Wenn der Bildschirm schmal ist (Handy Hochformat) */
+        @media (max-width: 600px) {
+            #game-menu { flex-direction: column; gap: 30px; }
+            h1 { font-size: 1.5rem !important; }
+        }
 
-        .btn-group { display: flex; flex-direction: column; gap: 8px; width: 250px; }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { font-size: 2.2rem; text-shadow: 4px 4px #000; margin-bottom: 30px; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 10px; width: 220px; }
 
         button {
-            background: #666; border: 4px solid #000; color: white;
-            padding: 10px; font-family: 'Press Start 2P'; font-size: 11px;
-            cursor: pointer; box-shadow: inset -3px -3px #333, inset 3px 3px #999;
+            background: #555; border: 4px solid #000; color: white;
+            padding: 12px; font-family: 'Press Start 2P'; font-size: 10px;
+            cursor: pointer; box-shadow: inset -3px -3px #222, inset 3px 3px #888;
         }
 
-        button:active { transform: scale(0.97); }
-
-        /* Charackter Sektion FIX: Größe und Positionierung */
         #char-section {
-            position: absolute; right: 6%; top: 50%;
-            transform: translateY(-50%); text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
 
-        /* Neuer Platz für den Namen: Unter dem Skin */
-        #player-name-display { 
-            font-size: 12px; color: #fff; 
-            background: rgba(0,0,0,0.5); padding: 4px; border-radius: 4px;
-        }
-
-        /* Ein kleinerer Pixel-Avatar */
         .pixel-avatar {
-            width: 60px; height: 100px; /* Kleiner als vorher */
-            position: relative; background: #3498db; /* Body */
+            width: 50px; height: 90px;
+            position: relative; background: #3498db;
             border: 4px solid #222;
         }
-        .pixel-avatar::before { /* Kopf */
-            content: ''; position: absolute; top: -30px; left: 8px;
-            width: 40px; height: 30px; background: #ffdbac; border: 4px solid #222;
+        .pixel-avatar::before {
+            content: ''; position: absolute; top: -30px; left: 5px;
+            width: 32px; height: 26px; background: #ffdbac; border: 4px solid #222;
         }
 
-        /* Footer FIX: Damit sie nicht mit anderen Sachen kollidieren */
-        .f-left { position: absolute; bottom: 8px; left: 12px; font-size: 8px; opacity: 0.7; }
-        .f-right { position: absolute; bottom: 8px; right: 12px; font-size: 8px; opacity: 0.7; }
+        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
 
-        /* Settings Overlay */
+        .f-left { position: absolute; bottom: 10px; left: 10px; font-size: 7px; }
+        .f-right { position: absolute; bottom: 10px; right: 10px; font-size: 7px; }
+
         #settings-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 10;
+            background: rgba(0,0,0,0.9); z-index: 10;
             flex-direction: column; align-items: center; justify-content: center;
         }
-
-        #settings-overlay h2 { font-size: 1.5rem; margin-bottom: 20px; }
-
-        input {
-            padding: 8px; font-family: 'Press Start 2P'; border: 4px solid #000;
-            margin-bottom: 15px; text-align: center; width: 220px; font-size: 10px;
-        }
+        input { padding: 10px; font-family: 'Press Start 2P'; width: 200px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div id="game-menu">
-        <h1>VOXELBOUND</h1>
-
-        <div class="btn-group">
-            <button onclick="startGame()">Play</button>
-            <button onclick="toggleSettings()">Settings</button>
+        <div class="main-content">
+            <h1>VOXELBOUND</h1>
+            <div class="btn-group">
+                <button onclick="alert('Loading...')">Play</button>
+                <button onclick="toggleSettings()">Settings</button>
+            </div>
         </div>
 
         <div id="char-section">
             <div class="pixel-avatar"></div>
             <div id="player-name-display">Player</div>
-            <button onclick="alert('Skins coming soon!')" style="width: 120px; font-size: 7px; padding: 6px;">Dressing Room</button>
+            <button onclick="alert('Soon!')" style="width: 110px; font-size: 7px; padding: 5px;">Dressing Room</button>
         </div>
 
         <div class="f-left">Made by MOE 2026</div>
@@ -100,33 +97,18 @@
 
     <div id="settings-overlay">
         <h2>Settings</h2>
-        <p style="font-size: 9px; margin-bottom: 5px;">Change Name:</p>
-        <input type="text" id="name-input" placeholder="Enter Name...">
-        <button onclick="saveSettings()">Save & Close</button>
+        <input type="text" id="name-input" placeholder="Name...">
+        <button onclick="saveSettings()">Save</button>
     </div>
 
     <script>
-        // Funktion zum Starten des Spiels (noch leer)
-        function startGame() {
-            alert('Loading VoxelBound World...\n(This is where the game will start)');
-        }
-
-        // Öffnet/Schließt das Einstellungs-Menü
         function toggleSettings() {
-            const overlay = document.getElementById('settings-overlay');
-            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
-            if (overlay.style.display === 'flex') {
-                // Füllt das Input-Feld mit dem aktuellen Namen
-                document.getElementById('name-input').value = document.getElementById('player-name-display').innerText;
-            }
+            const o = document.getElementById('settings-overlay');
+            o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
         }
-
-        // Speichert den Namen und schließt die Settings
         function saveSettings() {
-            const newName = document.getElementById('name-input').value;
-            if(newName.trim() !== "") {
-                document.getElementById('player-name-display').innerText = newName;
-            }
+            const n = document.getElementById('name-input').value;
+            if(n.trim()) document.getElementById('player-name-display').innerText = n;
             toggleSettings();
         }
     </script>
