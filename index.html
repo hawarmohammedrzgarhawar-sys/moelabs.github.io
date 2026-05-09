@@ -2,159 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoxelBound - Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VoxelBound</title>
     <style>
-        /* Minecraft-Style Schriftart-Ersatz */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Press Start 2P', cursive;
-            color: white;
-            /* Ein dunkler Wald-Hintergrund als Platzhalter */
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://img.freepik.com/free-photo/view-mysterious-forest-with-fog_23-2150774614.jpg?size=626&ext=jpg');
-            background-size: cover;
-            background-position: center;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; font-family: 'Press Start 2P', cursive;
+            background: #444; color: white;
         }
 
-        #ui-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            text-align: center;
+        #game-menu {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
         }
 
-        h1 {
-            font-size: 3rem;
-            text-shadow: 4px 4px #333;
-            margin-bottom: 50px;
-            color: #ccc;
-        }
+        h1 { font-size: 2.5rem; text-shadow: 5px 5px #000; margin-bottom: 40px; color: #eee; }
 
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 300px;
-        }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; width: 280px; }
 
         button {
-            background-color: #777;
-            border: 3px solid #000;
-            color: white;
-            padding: 15px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: inset -4px -4px #444, inset 4px 4px #aaa;
+            background: #666; border: 4px solid #000; color: white;
+            padding: 12px; font-family: 'Press Start 2P'; font-size: 12px;
+            cursor: pointer; box-shadow: inset -4px -4px #333, inset 4px 4px #999;
         }
 
-        button:hover {
-            background-color: #888;
-            border-color: white;
+        button:active { transform: scale(0.98); }
+
+        /* Charakter Sektion */
+        #char-section {
+            position: absolute; right: 8%; top: 50%;
+            transform: translateY(-50%); text-align: center;
         }
 
-        /* Charakter-Bereich rechts */
-        #character-preview {
-            position: absolute;
-            right: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        #player-name-display { margin-bottom: 15px; font-size: 14px; color: #fff; }
 
-        .pixel-char {
-            width: 100px;
-            height: 180px;
-            background-color: #3498db; /* Platzhalter Skin-Farbe */
+        /* Ein einfacher Pixel-Avatar aus CSS */
+        .pixel-avatar {
+            width: 80px; height: 120px; margin: 0 auto 15px;
+            position: relative; background: #3498db; /* Body */
             border: 4px solid #222;
-            margin-bottom: 10px;
+        }
+        .pixel-avatar::before { /* Kopf */
+            content: ''; position: absolute; top: -35px; left: 10px;
+            width: 52px; height: 35px; background: #ffdbac; border: 4px solid #222;
         }
 
-        /* Info-Texte unten */
-        .footer-left {
-            position: absolute;
-            bottom: 10px;
-            left: 15px;
-            font-size: 10px;
+        /* Footer */
+        .f-left { position: absolute; bottom: 10px; left: 15px; font-size: 9px; opacity: 0.7; }
+        .f-right { position: absolute; bottom: 10px; right: 15px; font-size: 9px; opacity: 0.7; }
+
+        /* Settings Overlay */
+        #settings-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10;
+            flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .footer-right {
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 10px;
-        }
-
-        /* Mobile Controls Simulation */
-        #mobile-controls {
-            display: none;
-            position: absolute;
-            bottom: 50px;
-            left: 50px;
-        }
-
-        .touch-btn {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: inline-block;
+        input {
+            padding: 10px; font-family: 'Press Start 2P'; border: 4px solid #000;
+            margin-bottom: 20px; text-align: center; width: 250px;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-container">
+    <div id="game-menu">
         <h1>VOXELBOUND</h1>
 
-        <div class="menu-buttons">
-            <button onclick="startGame()">Play</button>
-            <button onclick="openSettings()">Settings</button>
+        <div class="btn-group">
+            <button onclick="alert('World Loading...')">Play</button>
+            <button onclick="toggleSettings()">Settings</button>
         </div>
 
-        <div id="character-preview">
-            <span>MOE</span>
-            <div class="pixel-char"></div>
-            <button style="width: 150px; font-size: 10px;">Dressing Room</button>
+        <div id="char-section">
+            <div id="player-name-display">Player</div>
+            <div class="pixel-avatar"></div>
+            <button onclick="alert('Skins coming soon!')" style="width: 140px; font-size: 8px;">Dressing Room</button>
         </div>
 
-        <div class="footer-left">
-            Made by MOE 2026
-        </div>
-
-        <div class="footer-right">
-            v0.0.1 ALPHA
-        </div>
+        <div class="f-left">Made by MOE 2026</div>
+        <div class="f-right">v0.0.1 ALPHA</div>
     </div>
 
-    <div id="mobile-controls">
-        <div class="touch-btn"></div>
+    <div id="settings-overlay">
+        <h2>Settings</h2>
+        <p style="font-size: 10px;">Change Name:</p>
+        <input type="text" id="name-input" placeholder="Enter Name...">
+        <button onclick="saveSettings()">Save & Close</button>
     </div>
 
     <script>
-        function startGame() {
-            alert("Starting VoxelBound...");
+        function toggleSettings() {
+            const overlay = document.getElementById('settings-overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        function openSettings() {
-            let mode = prompt("Choose Mode: PC or Mobile").toLowerCase();
-            if(mode === "mobile") {
-                document.getElementById('mobile-controls').style.display = 'block';
-                alert("Mobile Buttons activated!");
-            } else {
-                document.getElementById('mobile-controls').style.display = 'none';
-                alert("PC Mode: Keyboard active.");
+        function saveSettings() {
+            const newName = document.getElementById('name-input').value;
+            if(newName.trim() !== "") {
+                document.getElementById('player-name-display').innerText = newName;
             }
+            toggleSettings();
         }
     </script>
 </body>
