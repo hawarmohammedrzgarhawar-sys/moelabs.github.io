@@ -16,13 +16,13 @@
         /* --- HAUPTMENÜ (UNVERÄNDERT) --- */
         #game-menu {
             display: flex; flex-direction: row; align-items: center; justify-content: center; 
-            height: 100vh; width: 100vw; gap: 50px;
+            height: 100vh; width: 100vw; gap: 60px;
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
         }
 
         @media (max-width: 600px) {
-            #game-menu { flex-direction: column; gap: 30px; }
+            #game-menu { flex-direction: column; gap: 40px; }
             h1 { font-size: 1.5rem !important; }
         }
 
@@ -36,75 +36,73 @@
             cursor: pointer; box-shadow: inset -3px -3px #222, inset 3px 3px #888;
         }
 
-        #char-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        /* --- DER NEUE STEVE (GENAU NACH BILD) --- */
+        #char-section { display: flex; flex-direction: column; align-items: center; gap: 15px; position: relative; }
 
-        /* --- FIX: REPARIERTER CHARAKTER --- */
-        .pixel-avatar {
-            width: 40px; height: 60px; position: relative; 
-            background: #008787; /* T-Shirt */
-            border: 4px solid #000;
+        .steve-container {
+            width: 80px; height: 160px;
+            position: relative;
+            image-rendering: pixelated;
         }
-        
-        /* Reparierter Kopf mit symmetrischem Gesicht */
-        .pixel-avatar::before {
-            content: ''; position: absolute; top: -44px; left: -4px; 
-            width: 40px; height: 36px; background: #ffdbac; 
-            border: 4px solid #000;
-            /* Haare, Augen und Bart als saubere Box-Shadows */
+
+        /* Kopf */
+        .steve-head {
+            width: 40px; height: 40px;
+            background: #d1a083; /* Hautfarbe */
+            position: absolute; left: 20px; top: 0;
+            border: 3px solid #000;
             box-shadow: 
-                inset 0 10px 0 #603b2c, /* Haare oben */
-                inset 10px 18px 0 #000, /* Auge links */
-                inset 26px 18px 0 #000, /* Auge rechts */
-                inset 10px 28px 0 #603b2c, inset 26px 28px 0 #603b2c; /* Bart/Mund symmetrisch */
+                inset 0 10px 0 #5b3927, /* Haare oben */
+                inset 8px 18px 0 #fff, inset 12px 18px 0 #6e50c4, /* Auge links */
+                inset 24px 18px 0 #fff, inset 28px 18px 0 #6e50c4, /* Auge rechts */
+                inset 14px 28px 0 #7b4d35; /* Nase/Bart */
         }
 
-        /* Reparierte Arme und Beine */
-        .pixel-avatar::after {
-            content: ''; position: absolute; bottom: -34px; left: -4px;
-            width: 40px; height: 30px; background: #4040ff; /* Hose */
-            border: 4px solid #000;
-            box-shadow: 
-                -24px -34px 0 #008787, -24px -34px 0 4px #000, /* Arm links */
-                24px -34px 0 #008787, 24px -34px 0 4px #000; /* Arm rechts */
+        /* Körper */
+        .steve-body {
+            width: 40px; height: 50px;
+            background: #00b9d1; /* Cyan Shirt */
+            position: absolute; left: 20px; top: 43px;
+            border: 3px solid #000;
         }
 
-        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; margin-top: 35px; }
+        /* Arme */
+        .steve-arm-l, .steve-arm-r {
+            width: 18px; height: 50px;
+            background: #00b9d1;
+            position: absolute; top: 43px;
+            border: 3px solid #000;
+        }
+        .steve-arm-l { left: -1px; border-right: none; }
+        .steve-arm-r { left: 63px; border-left: none; }
 
-        .f-left { position: absolute; bottom: 10px; left: 10px; font-size: 7px; }
-        .f-right { position: absolute; bottom: 10px; right: 10px; font-size: 7px; }
+        /* Beine */
+        .steve-legs {
+            width: 40px; height: 55px;
+            background: #4a4abf; /* Lila-Blaue Hose */
+            position: absolute; left: 20px; top: 96px;
+            border: 3px solid #000;
+            box-shadow: inset 0 -10px 0 #333; /* Schuhe */
+        }
 
-        /* --- SETTINGS LISTE DESIGN (UNVERÄNDERT) --- */
+        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; margin-top: 10px; }
+
+        /* --- SETTINGS (UNVERÄNDERT) --- */
         #settings-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 20, 20, 0.95); z-index: 100;
             flex-direction: column; align-items: center; justify-content: center;
         }
-
         .settings-list {
             display: flex; flex-direction: column; gap: 20px; width: 300px;
             background: #333; padding: 30px; border: 4px solid #000;
             position: relative;
         }
+        input { padding: 8px; font-family: 'Press Start 2P'; font-size: 10px; border: 3px solid #000; text-align: center; }
+        .back-btn { position: absolute; bottom: -50px; left: 0; background: #a33; width: 100px; }
 
-        .setting-item { display: flex; flex-direction: column; gap: 10px; }
-
-        .setting-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            font-size: 10px;
-        }
-
-        input { 
-            padding: 8px; font-family: 'Press Start 2P'; font-size: 10px;
-            border: 3px solid #000; text-align: center; background: #eee;
-        }
-
-        .toggle-btn { width: 80px; padding: 5px; font-size: 8px; }
-
-        .back-btn {
-            position: absolute; bottom: -50px; left: 0;
-            background: #a33; width: 100px;
-        }
-
+        .f-left { position: absolute; bottom: 10px; left: 10px; font-size: 7px; opacity: 0.5; }
+        .f-right { position: absolute; bottom: 10px; right: 10px; font-size: 7px; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -119,9 +117,15 @@
         </div>
 
         <div id="char-section">
-            <div class="pixel-avatar"></div>
+            <div class="steve-container">
+                <div class="steve-arm-l"></div>
+                <div class="steve-head"></div>
+                <div class="steve-body"></div>
+                <div class="steve-arm-r"></div>
+                <div class="steve-legs"></div>
+            </div>
             <div id="player-name-display">Player</div>
-            <button onclick="alert('Soon!')" style="width: 110px; font-size: 7px; padding: 5px;">Dressing Room</button>
+            <button onclick="alert('Soon!')" style="width: 130px; font-size: 7px; padding: 5px;">Dressing Room</button>
         </div>
 
         <div class="f-left">Made by MOE 2026</div>
@@ -130,25 +134,11 @@
 
     <div id="settings-overlay">
         <div class="settings-list">
-            <h2 style="font-size: 14px; margin-bottom: 10px; text-align: center;">SETTINGS</h2>
-            
-            <div class="setting-item">
+            <h2 style="font-size: 14px; text-align: center;">SETTINGS</h2>
+            <div style="display:flex; flex-direction:column; gap:5px;">
                 <span style="font-size: 8px;">Character Name:</span>
                 <input type="text" id="name-input" placeholder="Player">
             </div>
-
-            <hr style="width: 100%; border: 1px solid #555;">
-
-            <div class="setting-row">
-                <span>Music:</span>
-                <button class="toggle-btn" id="music-btn" onclick="toggleOption('music-btn')">ON</button>
-            </div>
-
-            <div class="setting-row">
-                <span>Sounds:</span>
-                <button class="toggle-btn" id="sound-btn" onclick="toggleOption('sound-btn')">ON</button>
-            </div>
-
             <button class="back-btn" onclick="saveAndClose()">BACK</button>
         </div>
     </div>
@@ -161,18 +151,9 @@
                 document.getElementById('name-input').value = document.getElementById('player-name-display').innerText;
             }
         }
-
-        function toggleOption(id) {
-            const btn = document.getElementById(id);
-            btn.innerText = (btn.innerText === 'ON') ? 'OFF' : 'ON';
-            btn.style.background = (btn.innerText === 'ON') ? '#555' : '#333';
-        }
-
         function saveAndClose() {
             const n = document.getElementById('name-input').value;
-            if(n.trim()) {
-                document.getElementById('player-name-display').innerText = n;
-            }
+            if(n.trim()) document.getElementById('player-name-display').innerText = n;
             toggleSettings();
         }
     </script>
