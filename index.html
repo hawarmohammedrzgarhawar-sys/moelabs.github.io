@@ -37,13 +37,38 @@
         }
 
         #char-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+        /* --- STEVE PIXEL DESIGN (VERBESSERT) --- */
         .pixel-avatar {
-            width: 50px; height: 90px; position: relative; background: #3498db; border: 4px solid #222;
+            width: 40px; height: 60px; position: relative; 
+            background: #008787; /* T-Shirt */
+            border: 4px solid #000;
         }
+        
+        /* Kopf mit Gesicht */
         .pixel-avatar::before {
-            content: ''; position: absolute; top: -30px; left: 5px; width: 32px; height: 26px; background: #ffdbac; border: 4px solid #222;
+            content: ''; position: absolute; top: -44px; left: -4px; 
+            width: 40px; height: 36px; background: #ffdbac; 
+            border: 4px solid #000;
+            /* Haare, Augen und Bart als Box-Shadow "Pixel" */
+            box-shadow: 
+                inset 0 10px 0 #603b2c, /* Haare oben */
+                inset 8px 18px 0 #fff, inset 12px 18px 0 #000, /* Auge links */
+                inset 24px 18px 0 #fff, inset 28px 18px 0 #000, /* Auge rechts */
+                inset 12px 28px 0 #603b2c; /* Bart/Mund */
         }
-        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
+
+        /* Beine und Arme */
+        .pixel-avatar::after {
+            content: ''; position: absolute; bottom: -34px; left: -4px;
+            width: 40px; height: 30px; background: #4040ff; /* Hose */
+            border: 4px solid #000;
+            box-shadow: 
+                -24px -34px 0 #008787, -24px -34px 0 4px #000, /* Arm links */
+                24px -34px 0 #008787, 24px -34px 0 4px #000; /* Arm rechts */
+        }
+
+        #player-name-display { font-size: 10px; background: rgba(0,0,0,0.5); padding: 5px; margin-top: 35px; }
 
         .f-left { position: absolute; bottom: 10px; left: 10px; font-size: 7px; }
         .f-right { position: absolute; bottom: 10px; right: 10px; font-size: 7px; }
