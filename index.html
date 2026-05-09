@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxelBound - Menu</title>
+    <title>VoxelBound - Alpha</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --mc-button-gray: #AAAAAA;
@@ -13,132 +14,69 @@
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Courier New', Courier, monospace; /* Minecraft-ähnliche Schrift */
-            background: #000 url('https://minecraft.wiki/images/Pan_Background_1.17.png') no-repeat center center fixed;
-            background-size: cover;
-        }
-
-        /* Haupt-Container */
-        #menu-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        /* Titel */
-        .title {
-            font-size: 3rem;
-            color: #FFFFFF;
-            text-shadow: 4px 4px #3f3f3f;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        /* Buttons Style */
-        .mc-button {
-            width: 300px;
-            max-width: 80%;
-            height: 45px;
-            background-color: var(--mc-button-gray);
-            border: 3px solid var(--mc-button-border-dark);
-            border-top-color: var(--mc-button-border-light);
-            border-left-color: var(--mc-button-border-light);
-            color: white;
-            font-size: 1.2rem;
-            text-shadow: var(--mc-font-shadow);
-            margin: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-        }
-
-        .mc-button:active {
-            border: 3px solid var(--mc-button-border-light);
-            border-top-color: var(--mc-button-border-dark);
-            border-left-color: var(--mc-button-border-dark);
-        }
-
-        /* Charakter & Dressing Room */
-        .character-preview {
-            position: absolute;
-            right: 10%;
-            bottom: 15%;
-            text-align: center;
-        }
-
-        #steve-svg {
-            width: 120px;
-            height: auto;
-            image-rendering: pixelated;
-        }
-
-        /* Settings Overlay */
-        #settings-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Info Texte */
-        .version-tag {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        .credits {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        input[type="text"] {
-            padding: 10px;
-            margin: 10px;
-            width: 200px;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; font-family: 'Courier New', Courier, monospace;
             background: #000;
-            border: 2px solid #fff;
-            color: #fff;
-            text-align: center;
         }
+
+        /* MENU STYLES (Heilig - unangetastet) */
+        #menu-container {
+            position: fixed; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.4) url('https://minecraft.wiki/images/Pan_Background_1.17.png') no-repeat center center;
+            background-size: cover; z-index: 10;
+        }
+
+        .title { font-size: 3rem; color: #FFFFFF; text-shadow: 4px 4px #3f3f3f; margin-bottom: 40px; text-align: center; }
+        .mc-button {
+            width: 300px; max-width: 80%; height: 45px; background-color: var(--mc-button-gray);
+            border: 3px solid var(--mc-button-border-dark); border-top-color: var(--mc-button-border-light);
+            border-left-color: var(--mc-button-border-light); color: white; font-size: 1.2rem;
+            text-shadow: var(--mc-font-shadow); margin: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* INGAME UI */
+        #game-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 20px; height: 20px; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Mobile Steuerung */
+        #joystick-area {
+            position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px;
+            background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto;
+        }
+        #jump-btn {
+            position: absolute; bottom: 40px; right: 40px; width: 60px; height: 60px;
+            background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 10px;
+            pointer-events: auto; color: white; display: flex; align-items: center; justify-content: center;
+        }
+
+        #settings-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .version-tag { position: absolute; bottom: 10px; left: 10px; color: white; }
+        .credits { position: absolute; bottom: 10px; right: 10px; color: white; }
+
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
 <div id="menu-container">
     <h1 class="title">VOXELBOUND</h1>
-
-    <button class="mc-button" onclick="alert('Starting Game...')">PLAY</button>
+    <button class="mc-button" onclick="startGame()">PLAY</button>
     <button class="mc-button" onclick="toggleSettings(true)">SETTINGS</button>
-
-    <div class="character-preview">
+    
+    <div style="position: absolute; right: 10%; bottom: 15%; text-align: center;">
         <p id="display-name" style="color: white; text-shadow: 2px 2px #000;">Player</p>
-        <svg id="steve-svg" viewBox="0 0 8 8">
-            <rect id="steve-body" x="2" y="0" width="4" height="8" fill="#5A5A5A" /> <rect x="2" y="0" width="4" height="4" fill="#ffdbac" /> </svg>
+        <svg id="steve-svg" width="100" viewBox="0 0 8 8">
+            <rect id="steve-body" x="2" y="0" width="4" height="8" fill="#5A5A5A" />
+            <rect x="2" y="0" width="4" height="4" fill="#ffdbac" />
+        </svg>
         <button class="mc-button" style="width: 150px; font-size: 0.8rem;" onclick="changeColor()">DRESS ROOM</button>
     </div>
 
@@ -148,52 +86,87 @@
 
 <div id="settings-screen">
     <h2 style="color: white;">SETTINGS</h2>
-    
     <button id="btn-music" class="mc-button" onclick="toggleOption('music')">Music: ON</button>
     <button id="btn-sound" class="mc-button" onclick="toggleOption('sound')">Sound: ON</button>
-    
-    <label style="color: white; margin-top: 10px;">Change Name:</label>
-    <input type="text" id="name-input" placeholder="Enter Name..." oninput="updateName()">
+    <input type="text" id="name-input" placeholder="Change Name..." oninput="updateName()" style="background:#000; color:#fff; border:2px solid #fff; padding:10px; margin:10px;">
+    <button class="mc-button" onclick="toggleSettings(false)">BACK</button>
+</div>
 
-    <button class="mc-button" style="margin-top: 30px;" onclick="toggleSettings(false)">BACK</button>
+<div id="game-ui">
+    <div id="crosshair">+</div>
+    <div id="joystick-area"></div>
+    <div id="jump-btn">JUMP</div>
 </div>
 
 <script>
-    // System Status
-    let config = {
-        music: true,
-        sound: true,
-        version: "1.1.2",
-        playerColor: "#5A5A5A"
-    };
+    let scene, camera, renderer, moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let config = { music: true, sound: true, version: "1.1.2", playerColor: "#5A5A5A" };
 
-    function toggleSettings(show) {
-        document.getElementById('settings-screen').style.display = show ? 'flex' : 'none';
+    // --- MENU FUNKTIONEN ---
+    function toggleSettings(show) { document.getElementById('settings-screen').style.display = show ? 'flex' : 'none'; }
+    function toggleOption(type) { 
+        config[type] = !config[type]; 
+        document.getElementById(`btn-${type}`).innerText = `${type.toUpperCase()}: ${config[type] ? 'ON' : 'OFF'}`; 
     }
-
-    function toggleOption(type) {
-        config[type] = !config[type];
-        document.getElementById(`btn-${type}`).innerText = `${type.toUpperCase()}: ${config[type] ? 'ON' : 'OFF'}`;
-    }
-
-    function updateName() {
-        const name = document.getElementById('name-input').value;
-        document.getElementById('display-name').innerText = name || "Player";
-    }
-
+    function updateName() { document.getElementById('display-name').innerText = document.getElementById('name-input').value || "Player"; }
     function changeColor() {
-        // Einfacher Farbwechsel für den "Dressing Room" Effekt
         const colors = ["#5A5A5A", "#3498db", "#e74c3c", "#2ecc71", "#f1c40f"];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        document.getElementById('steve-body').setAttribute('fill', randomColor);
-        config.playerColor = randomColor;
+        config.playerColor = colors[Math.floor(Math.random() * colors.length)];
+        document.getElementById('steve-body').setAttribute('fill', config.playerColor);
     }
 
-    // Anti-Zoom Fix für Mobile
-    document.addEventListener('touchmove', function (event) {
-        if (event.scale !== 1) { event.preventDefault(); }
-    }, { passive: false });
-</script>
+    // --- GAME ENGINE ---
+    function startGame() {
+        document.getElementById('menu-container').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'block';
+        initGame();
+    }
 
+    function initGame() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Licht
+        const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+        scene.add(light);
+
+        // 16x16 Welt Generierung
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshLambertMaterial({ color: 0x4d9043 }); // Gras Grün
+
+        for(let x = 0; x < 16; x++) {
+            for(let z = 0; z < 16; z++) {
+                const block = new THREE.Mesh(geometry, material);
+                block.position.set(x - 8, -1, z - 8);
+                scene.add(block);
+            }
+        }
+
+        camera.position.set(0, 1.6, 0); // Augenhöhe
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        // Hier kommt später die Bewegungs-Logik rein
+        renderer.render(scene, camera);
+    }
+
+    // Mobile Fixes
+    window.addEventListener('resize', () => {
+        if(camera) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    });
+
+    document.addEventListener('touchmove', (e) => { if (e.scale !== 1) e.preventDefault(); }, { passive: false });
+</script>
 </body>
 </html>
