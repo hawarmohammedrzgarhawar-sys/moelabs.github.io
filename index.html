@@ -38,27 +38,27 @@
 
         #char-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
-        /* --- STEVE PIXEL DESIGN (VERBESSERT) --- */
+        /* --- FIX: REPARIERTER CHARAKTER --- */
         .pixel-avatar {
             width: 40px; height: 60px; position: relative; 
             background: #008787; /* T-Shirt */
             border: 4px solid #000;
         }
         
-        /* Kopf mit Gesicht */
+        /* Reparierter Kopf mit symmetrischem Gesicht */
         .pixel-avatar::before {
             content: ''; position: absolute; top: -44px; left: -4px; 
             width: 40px; height: 36px; background: #ffdbac; 
             border: 4px solid #000;
-            /* Haare, Augen und Bart als Box-Shadow "Pixel" */
+            /* Haare, Augen und Bart als saubere Box-Shadows */
             box-shadow: 
                 inset 0 10px 0 #603b2c, /* Haare oben */
-                inset 8px 18px 0 #fff, inset 12px 18px 0 #000, /* Auge links */
-                inset 24px 18px 0 #fff, inset 28px 18px 0 #000, /* Auge rechts */
-                inset 12px 28px 0 #603b2c; /* Bart/Mund */
+                inset 10px 18px 0 #000, /* Auge links */
+                inset 26px 18px 0 #000, /* Auge rechts */
+                inset 10px 28px 0 #603b2c, inset 26px 28px 0 #603b2c; /* Bart/Mund symmetrisch */
         }
 
-        /* Beine und Arme */
+        /* Reparierte Arme und Beine */
         .pixel-avatar::after {
             content: ''; position: absolute; bottom: -34px; left: -4px;
             width: 40px; height: 30px; background: #4040ff; /* Hose */
@@ -73,7 +73,7 @@
         .f-left { position: absolute; bottom: 10px; left: 10px; font-size: 7px; }
         .f-right { position: absolute; bottom: 10px; right: 10px; font-size: 7px; }
 
-        /* --- SETTINGS LISTE DESIGN --- */
+        /* --- SETTINGS LISTE DESIGN (UNVERÄNDERT) --- */
         #settings-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 20, 20, 0.95); z-index: 100;
