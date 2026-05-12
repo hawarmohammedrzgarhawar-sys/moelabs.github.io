@@ -1,168 +1,971 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Snake - Responsive</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #2c3e50;
-            color: white;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            touch-action: none; /* Prevents scrolling while playing */
-        }
-        canvas {
-            border: 5px solid #ecf0f1;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            background-color: #000;
-            max-width: 90vw;
-            max-height: 70vh;
-        }
-        .stats {
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        .controls-hint {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #bdc3c7;
-            text-align: center;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MoeCraft: Pocket Edition</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: Arial, sans-serif;
+    touch-action: none;
+}
+
+canvas {
+    display: block;
+}
+
+#menu {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(#58a8ff, #8fd3ff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+.title {
+    font-size: 42px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 4px 4px 0 #000;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.menu-btn {
+    width: 240px;
+    padding: 16px;
+    margin: 10px;
+    border: 4px solid #222;
+    background: #6c6c6c;
+    color: white;
+    font-size: 24px;
+    border-radius: 12px;
+}
+
+.menu-btn:active {
+    transform: scale(0.96);
+}
+
+#madeby {
+    position: absolute;
+    bottom: 18px;
+    color: white;
+    font-size: 18px;
+    text-shadow: 2px 2px 0 black;
+}
+
+.panel {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    display: none;
+    z-index: 30;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.panel h2 {
+    text-align: center;
+}
+
+.slider-wrap {
+    margin: 20px 0;
+}
+
+.slider-wrap label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type=range] {
+    width: 100%;
+}
+
+.close-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 30px;
+    border: none;
+    background: #4caf50;
+    color: white;
+    font-size: 20px;
+    border-radius: 10px;
+}
+
+#hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    display: none;
+}
+
+#crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border: 2px solid black;
+    transform: translate(-50%, -50%);
+}
+
+#hearts {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: red;
+    font-size: 28px;
+    text-shadow: 2px 2px black;
+}
+
+#hunger {
+    position: absolute;
+    top: 44px;
+    left: 10px;
+    color: orange;
+    font-size: 24px;
+    text-shadow: 2px 2px black;
+}
+
+#coords {
+    position: absolute;
+    top: 78px;
+    left: 10px;
+    color: white;
+    font-size: 16px;
+    text-shadow: 2px 2px black;
+}
+
+#hotbar {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.slot {
+    width: 52px;
+    height: 52px;
+    border: 3px solid #444;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+.selected {
+    border-color: yellow;
+}
+
+#joystickArea {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50%;
+    height: 45%;
+    pointer-events: auto;
+}
+
+#joystickBase {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid rgba(255,255,255,0.35);
+    display: none;
+}
+
+#joystickStick {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    left: 32px;
+    top: 32px;
+}
+
+#rightControls {
+    position: absolute;
+    right: 12px;
+    bottom: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.ctrl-btn {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+}
+
+.ctrl-btn:active {
+    transform: scale(0.92);
+}
+
+#inventoryPanel {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: none;
+    z-index: 40;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#inventoryGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.inv-item {
+    height: 80px;
+    background: #333;
+    border: 3px solid #777;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+#dressroomCanvas {
+    width: 100%;
+    height: 400px;
+    background: #6ec6ff;
+    border-radius: 14px;
+}
+
+</style>
 </head>
 <body>
 
-    <div class="stats">Score: <span id="scoreVal">0</span></div>
-    <canvas id="snakeGame" width="400" height="400"></canvas>
-    <div class="controls-hint">
-        Desktop: Use Arrow Keys<br>
-        Mobile/Tablet: Swipe to Turn
+<div id="menu">
+    <div class="title">MoeCraft:<br>Pocket Edition</div>
+
+    <button class="menu-btn" id="playBtn">Spielen</button>
+    <button class="menu-btn" id="settingsBtn">Einstellungen</button>
+    <button class="menu-btn" id="dressroomBtn">Dressroom</button>
+
+    <div id="madeby">Made by Moe</div>
+</div>
+
+<div class="panel" id="settingsPanel">
+    <h2>Einstellungen</h2>
+
+    <div class="slider-wrap">
+        <label>Renderdistanz</label>
+        <input type="range" id="renderSlider" min="20" max="120" value="60">
     </div>
 
-    <script>
-        const canvas = document.getElementById("snakeGame");
-        const ctx = canvas.getContext("2d");
-        const scoreElement = document.getElementById("scoreVal");
+    <div class="slider-wrap">
+        <label>Sensibilität</label>
+        <input type="range" id="sensSlider" min="1" max="10" value="4">
+    </div>
 
-        const box = 20; // Size of one square
-        let score = 0;
-        let gameSpeed = 100;
+    <button class="close-btn" id="closeSettings">Schließen</button>
+</div>
 
-        let snake = [{ x: 10 * box, y: 10 * box }];
-        let food = {
-            x: Math.floor(Math.random() * 19 + 1) * box,
-            y: Math.floor(Math.random() * 19 + 1) * box
+<div class="panel" id="dressroomPanel">
+    <h2>Dressroom</h2>
+    <canvas id="dressroomCanvas"></canvas>
+    <button class="close-btn" id="closeDressroom">Schließen</button>
+</div>
+
+<div id="inventoryPanel">
+    <h2>Inventar</h2>
+    <div id="inventoryGrid"></div>
+    <button class="close-btn" id="closeInventory">Schließen</button>
+</div>
+
+<div id="hud">
+    <div id="crosshair"></div>
+    <div id="hearts"></div>
+    <div id="hunger"></div>
+    <div id="coords"></div>
+
+    <div id="hotbar"></div>
+
+    <div id="joystickArea">
+        <div id="joystickBase">
+            <div id="joystickStick"></div>
+        </div>
+    </div>
+
+    <div id="rightControls">
+        <button class="ctrl-btn" id="jumpBtn">Jump</button>
+        <button class="ctrl-btn" id="mineBtn">Mine</button>
+        <button class="ctrl-btn" id="placeBtn">Place</button>
+        <button class="ctrl-btn" id="invBtn">Bag</button>
+    </div>
+</div>
+
+<script>
+let scene, camera, renderer;
+let world = {};
+let blocks = [];
+let animals = [];
+
+const WORLD_SIZE = 16;
+
+const BLOCK = {
+    grass: 0x44aa44,
+    dirt: 0x8a5a2b,
+    stone: 0x777777,
+    wood: 0x6b4a2b,
+    leaves: 0x228833,
+    pig: 0xff99aa
+};
+
+let renderDistance = 60;
+let sensitivity = 0.004;
+
+const player = {
+    x: 8,
+    y: 8,
+    z: 8,
+    velY: 0,
+    grounded: false,
+    health: 10,
+    hunger: 10,
+    yaw: 0,
+    pitch: 0,
+    selected: "grass",
+    inventory: {
+        grass: 10,
+        dirt: 5,
+        stone: 3,
+        wood: 0,
+        leaves: 0
+    },
+    lastGroundY: 8
+};
+
+let moveX = 0;
+let moveY = 0;
+
+const raycaster = new THREE.Raycaster();
+
+function initGame() {
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth/window.innerHeight,
+        0.1,
+        1000
+    );
+
+    renderer = new THREE.WebGLRenderer({ antialias: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(20, 40, 20);
+    scene.add(light);
+
+    const amb = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(amb);
+
+    generateWorld();
+    spawnAnimals();
+    createPlayerBody();
+    updateHotbar();
+    animate();
+}
+
+function createCube(x, y, z, color, type) {
+    const geo = new THREE.BoxGeometry(1,1,1);
+    const mat = new THREE.MeshLambertMaterial({ color });
+    const mesh = new THREE.Mesh(geo, mat);
+
+    mesh.position.set(x+0.5, y+0.5, z+0.5);
+
+    scene.add(mesh);
+
+    const key = `${x},${y},${z}`;
+
+    world[key] = {
+        mesh,
+        type,
+        x,y,z
+    };
+
+    blocks.push(world[key]);
+}
+
+function removeBlock(x,y,z) {
+    const key = `${x},${y},${z}`;
+
+    if(world[key]) {
+        scene.remove(world[key].mesh);
+
+        player.inventory[world[key].type] =
+            (player.inventory[world[key].type] || 0) + 1;
+
+        delete world[key];
+        updateHotbar();
+    }
+}
+
+function generateTree(x,z,height) {
+    for(let y=4;y<4+height;y++) {
+        createCube(x,y,z,BLOCK.wood,"wood");
+    }
+
+    for(let lx=-1;lx<=1;lx++) {
+        for(let lz=-1;lz<=1;lz++) {
+            for(let ly=height+2;ly<=height+3;ly++) {
+                createCube(x+lx,ly,z+lz,BLOCK.leaves,"leaves");
+            }
+        }
+    }
+}
+
+function generateWorld() {
+
+    for(let x=0;x<WORLD_SIZE;x++) {
+        for(let z=0;z<WORLD_SIZE;z++) {
+
+            createCube(x,0,z,BLOCK.stone,"stone");
+            createCube(x,1,z,BLOCK.stone,"stone");
+            createCube(x,2,z,BLOCK.dirt,"dirt");
+            createCube(x,3,z,BLOCK.grass,"grass");
+
+        }
+    }
+
+    for(let i=0;i<4;i++) {
+        let tx = Math.floor(Math.random()*12)+2;
+        let tz = Math.floor(Math.random()*12)+2;
+        generateTree(tx,tz,3);
+    }
+}
+
+function createPlayerBody() {
+    camera.position.set(player.x, player.y, player.z);
+}
+
+function spawnAnimals() {
+    const count = 1 + Math.floor(Math.random()*2);
+
+    for(let i=0;i<count;i++) {
+
+        const geo = new THREE.BoxGeometry(1,1,1.5);
+        const mat = new THREE.MeshLambertMaterial({ color: BLOCK.pig });
+        const pig = new THREE.Mesh(geo, mat);
+
+        pig.position.set(
+            Math.random()*10+3,
+            5,
+            Math.random()*10+3
+        );
+
+        pig.userData = {
+            dir: Math.random()*Math.PI*2
         };
 
-        let d; // Direction
+        scene.add(pig);
+        animals.push(pig);
+    }
+}
 
-        // 1. KEYBOARD CONTROLS (PC/Laptop)
-        document.addEventListener("keydown", direction);
-        function direction(event) {
-            let key = event.keyCode;
-            if(key == 37 && d != "RIGHT") d = "LEFT";
-            else if(key == 38 && d != "DOWN") d = "UP";
-            else if(key == 39 && d != "LEFT") d = "RIGHT";
-            else if(key == 40 && d != "UP") d = "DOWN";
+function updateAnimals(dt) {
+
+    animals.forEach(a=>{
+
+        if(Math.random() < 0.01) {
+            a.userData.dir += (Math.random()-0.5);
         }
 
-        // 2. TOUCH CONTROLS (iPad/Mobile)
-        let touchstartX = 0;
-        let touchstartY = 0;
-        let touchendX = 0;
-        let touchendY = 0;
+        a.position.x += Math.cos(a.userData.dir)*dt*0.8;
+        a.position.z += Math.sin(a.userData.dir)*dt*0.8;
 
-        document.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-            touchstartY = e.changedTouches[0].screenY;
-        });
+        if(a.position.x < 1 || a.position.x > 15)
+            a.userData.dir += Math.PI;
 
-        document.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            touchendY = e.changedTouches[0].screenY;
-            handleGesture();
-        });
+        if(a.position.z < 1 || a.position.z > 15)
+            a.userData.dir += Math.PI;
 
-        function handleGesture() {
-            let dx = touchendX - touchstartX;
-            let dy = touchendY - touchstartY;
+    });
+}
 
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0 && d != "LEFT") d = "RIGHT";
-                else if (dx < 0 && d != "RIGHT") d = "LEFT";
-            } else {
-                if (dy > 0 && d != "UP") d = "DOWN";
-                else if (dy < 0 && d != "DOWN") d = "UP";
+function getBlock(x,y,z) {
+    return world[`${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`];
+}
+
+function physics(dt) {
+
+    const speed = 4;
+
+    let dx = 0;
+    let dz = 0;
+
+    dx += Math.sin(player.yaw) * moveY * speed * dt;
+    dz += Math.cos(player.yaw) * moveY * speed * dt;
+
+    dx += Math.sin(player.yaw + Math.PI/2) * moveX * speed * dt;
+    dz += Math.cos(player.yaw + Math.PI/2) * moveX * speed * dt;
+
+    player.x += dx;
+    player.z += dz;
+
+    player.velY -= 15 * dt;
+    player.y += player.velY * dt;
+
+    let below = getBlock(player.x, player.y-1.7, player.z);
+
+    if(below && player.velY <=0) {
+
+        if(!player.grounded) {
+
+            let fallDist = player.lastGroundY - player.y;
+
+            if(fallDist > 4) {
+                player.health -= Math.floor(fallDist/2);
+
+                if(player.health <=0) {
+                    respawn();
+                }
             }
         }
 
-        // Collision Check
-        function collision(head, array) {
-            for(let i = 0; i < array.length; i++) {
-                if(head.x == array[i].x && head.y == array[i].y) return true;
-            }
-            return false;
+        player.grounded = true;
+        player.velY = 0;
+        player.y = Math.floor(player.y)+0.7;
+        player.lastGroundY = player.y;
+
+    } else {
+        if(player.grounded) {
+            player.lastGroundY = player.y;
         }
+        player.grounded = false;
+    }
 
-        // Main Draw Function
-        function draw() {
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if(player.x < 0 || player.x > 16 || player.z < 0 || player.z > 16 || player.y < -10) {
+        respawn();
+    }
 
-            for(let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60";
-                ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                ctx.strokeStyle = "black";
-                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+    camera.position.set(player.x, player.y, player.z);
+
+    camera.rotation.order = "YXZ";
+    camera.rotation.y = player.yaw;
+    camera.rotation.x = player.pitch;
+}
+
+function respawn() {
+    player.x = 8;
+    player.y = 8;
+    player.z = 8;
+    player.velY = 0;
+    player.health = 10;
+}
+
+function mineBlock() {
+
+    raycaster.setFromCamera(
+        new THREE.Vector2(0,0),
+        camera
+    );
+
+    const meshes = [];
+
+    for(let k in world) {
+        meshes.push(world[k].mesh);
+    }
+
+    const hits = raycaster.intersectObjects(meshes);
+
+    if(hits.length > 0 && hits[0].distance < 6) {
+
+        const obj = hits[0].object;
+
+        for(let k in world) {
+            if(world[k].mesh === obj) {
+
+                removeBlock(world[k].x, world[k].y, world[k].z);
+                break;
             }
-
-            // Draw Food
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(food.x, food.y, box, box);
-
-            // Old head position
-            let snakeX = snake[0].x;
-            let snakeY = snake[0].y;
-
-            // Move direction
-            if( d == "LEFT") snakeX -= box;
-            if( d == "UP") snakeY -= box;
-            if( d == "RIGHT") snakeX += box;
-            if( d == "DOWN") snakeY += box;
-
-            // Eat Food
-            if(snakeX == food.x && snakeY == food.y) {
-                score++;
-                scoreElement.innerHTML = score;
-                food = {
-                    x: Math.floor(Math.random() * 19 + 1) * box,
-                    y: Math.floor(Math.random() * 19 + 1) * box
-                };
-            } else {
-                snake.pop(); // Remove tail
-            }
-
-            let newHead = { x: snakeX, y: snakeY };
-
-            // Game Over rules
-            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
-                clearInterval(game);
-                alert("Game Over! Score: " + score);
-                location.reload(); // Restart
-            }
-
-            snake.unshift(newHead);
         }
+    }
+}
 
-        let game = setInterval(draw, gameSpeed);
+function placeBlock() {
 
-    </script>
-</body>
-</html>
+    raycaster.setFromCamera(
+        new THREE.Vector2(0,0),
+        camera
+    );
+
+    const meshes = [];
+
+    for(let k in world) {
+        meshes.push(world[k].mesh);
+    }
+
+    const hits = raycaster.intersectObjects(meshes);
+
+    if(hits.length > 0 && hits[0].distance < 6) {
+
+        const hit = hits[0];
+
+        const pos = hit.object.position.clone();
+        const normal = hit.face.normal;
+
+        const x = Math.floor(pos.x + normal.x);
+        const y = Math.floor(pos.y + normal.y);
+        const z = Math.floor(pos.z + normal.z);
+
+        if(!world[`${x},${y},${z}`]) {
+
+            if(player.inventory[player.selected] > 0) {
+
+                createCube(x,y,z,BLOCK[player.selected],player.selected);
+
+                player.inventory[player.selected]--;
+                updateHotbar();
+            }
+        }
+    }
+}
+
+function updateHUD() {
+
+    document.getElementById("hearts").innerHTML =
+        "❤".repeat(Math.max(0,player.health));
+
+    document.getElementById("hunger").innerHTML =
+        "🍗".repeat(Math.floor(player.hunger));
+
+    document.getElementById("coords").innerHTML =
+        `X:${player.x.toFixed(1)} Y:${player.y.toFixed(1)} Z:${player.z.toFixed(1)}`;
+}
+
+function updateHotbar() {
+
+    const hotbar = document.getElementById("hotbar");
+    hotbar.innerHTML = "";
+
+    Object.keys(player.inventory).forEach(type=>{
+
+        const div = document.createElement("div");
+        div.className = "slot";
+
+        if(player.selected === type)
+            div.classList.add("selected");
+
+        div.innerHTML = `${type}<br>${player.inventory[type]}`;
+
+        div.onclick = ()=> {
+            player.selected = type;
+            updateHotbar();
+        };
+
+        hotbar.appendChild(div);
+    });
+
+    updateInventoryPanel();
+}
+
+function updateInventoryPanel() {
+
+    const grid = document.getElementById("inventoryGrid");
+    grid.innerHTML = "";
+
+    Object.keys(player.inventory).forEach(type=>{
+
+        const div = document.createElement("div");
+        div.className = "inv-item";
+        div.innerHTML = `${type}<br>${player.inventory[type]}`;
+
+        div.onclick = ()=> {
+            player.selected = type;
+            updateHotbar();
+        };
+
+        grid.appendChild(div);
+    });
+}
+
+let dayTime = 0;
+
+function updateDayNight(dt) {
+
+    dayTime += dt * 0.03;
+
+    const t = (Math.sin(dayTime)+1)/2;
+
+    const r = 0.1 + t*0.4;
+    const g = 0.1 + t*0.6;
+    const b = 0.2 + t*0.8;
+
+    renderer.setClearColor(new THREE.Color(r,g,b));
+}
+
+let last = performance.now();
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    const now = performance.now();
+    const dt = Math.min((now-last)/1000, 0.05);
+    last = now;
+
+    physics(dt);
+    updateAnimals(dt);
+    updateHUD();
+    updateDayNight(dt);
+
+    player.hunger -= dt * 0.01;
+
+    if(player.hunger <= 0) {
+        player.hunger = 0;
+        player.health -= dt * 0.05;
+
+        if(player.health <=0) {
+            respawn();
+        }
+    }
+
+    camera.far = renderDistance;
+    camera.updateProjectionMatrix();
+
+    renderer.render(scene, camera);
+}
+
+window.addEventListener("resize", ()=>{
+
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+});
+
+document.getElementById("playBtn").onclick = ()=>{
+
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("hud").style.display = "block";
+
+    if(!scene) initGame();
+};
+
+document.getElementById("settingsBtn").onclick = ()=> {
+    document.getElementById("settingsPanel").style.display = "block";
+};
+
+document.getElementById("closeSettings").onclick = ()=> {
+    document.getElementById("settingsPanel").style.display = "none";
+};
+
+document.getElementById("dressroomBtn").onclick = ()=> {
+    document.getElementById("dressroomPanel").style.display = "block";
+    renderDressroom();
+};
+
+document.getElementById("closeDressroom").onclick = ()=> {
+    document.getElementById("dressroomPanel").style.display = "none";
+};
+
+document.getElementById("renderSlider").oninput = (e)=> {
+    renderDistance = parseInt(e.target.value);
+};
+
+document.getElementById("sensSlider").oninput = (e)=> {
+    sensitivity = parseFloat(e.target.value)*0.001;
+};
+
+document.getElementById("jumpBtn").ontouchstart = ()=>{
+
+    if(player.grounded) {
+        player.velY = 7;
+        player.grounded = false;
+    }
+};
+
+document.getElementById("mineBtn").ontouchstart = ()=> {
+    mineBlock();
+};
+
+document.getElementById("placeBtn").ontouchstart = ()=> {
+    placeBlock();
+};
+
+document.getElementById("invBtn").ontouchstart = ()=> {
+    document.getElementById("inventoryPanel").style.display = "block";
+};
+
+document.getElementById("closeInventory").onclick = ()=> {
+    document.getElementById("inventoryPanel").style.display = "none";
+};
+
+const joystickArea = document.getElementById("joystickArea");
+const base = document.getElementById("joystickBase");
+
+let joyActive = false;
+let joyStartX = 0;
+let joyStartY = 0;
+
+joystickArea.addEventListener("touchstart", e=>{
+
+    const t = e.touches[0];
+
+    joyActive = true;
+
+    joyStartX = t.clientX;
+    joyStartY = t.clientY;
+
+    base.style.display = "block";
+    base.style.left = (joyStartX-60)+"px";
+    base.style.top = (joyStartY-60)+"px";
+
+});
+
+joystickArea.addEventListener("touchmove", e=>{
+
+    if(!joyActive) return;
+
+    const t = e.touches[0];
+
+    let dx = t.clientX - joyStartX;
+    let dy = t.clientY - joyStartY;
+
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    if(dist > 40) {
+        dx = dx/dist*40;
+        dy = dy/dist*40;
+    }
+
+    moveX = dx/40;
+    moveY = -dy/40;
+
+});
+
+joystickArea.addEventListener("touchend", ()=>{
+
+    joyActive = false;
+    moveX = 0;
+    moveY = 0;
+    base.style.display = "none";
+
+});
+
+let lookActive = false;
+let lastLookX = 0;
+let lastLookY = 0;
+
+document.body.addEventListener("touchstart", e=>{
+
+    const t = e.touches[0];
+
+    if(t.clientX > window.innerWidth/2) {
+
+        lookActive = true;
+        lastLookX = t.clientX;
+        lastLookY = t.clientY;
+    }
+
+}, {passive:false});
+
+document.body.addEventListener("touchmove", e=>{
+
+    if(!lookActive) return;
+
+    const t = e.touches[0];
+
+    const dx = t.clientX - lastLookX;
+    const dy = t.clientY - lastLookY;
+
+    lastLookX = t.clientX;
+    lastLookY = t.clientY;
+
+    player.yaw -= dx * sensitivity;
+    player.pitch -= dy * sensitivity;
+
+    player.pitch = Math.max(
+        -Math.PI/2,
+        Math.min(Math.PI/2, player.pitch)
+    );
+
+}, {passive:false});
+
+document.body.addEventListener("touchend", ()=>{
+
+    lookActive = false;
+
+});
+
+function renderDressroom() {
+
+    const canvas = document.getElementById("dressroomCanvas");
+
+    const renderer2 = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true
+    });
+
+    renderer2.setSize(canvas.clientWidth, canvas.clientHeight);
+
+    const scene2 = new THREE.Scene();
+    scene2.background = new THREE.Color(0x6ec6ff);
+
+    const camera2 = new THREE.PerspectiveCamera(
+        70,
+        canvas.clientWidth/canvas.clientHeight,
+        0.1,
+        100
+    );
+
+    camera2.position.z = 6;
+
+    const light = new THREE.DirectionalLight(0xffffff,1);
+    light.position.set(5,10,5);
+
+    scene2.add(light);
+
+    const amb = new THREE.AmbientLight(0xffffff,0.8);
+    scene2.add(amb);
+
+    const group = new THREE.Group();
+
+    const skin = new THREE.MeshLambertMaterial({color:0xffd6b0});
+    const blue = new THREE.MeshLambertMaterial({color:0x66ccff});
+    const dark = new THREE.MeshLambertMaterial({color:0x2233aa});
+    const hair = new THREE.MeshLambertMaterial({color:0x5a3a22});
+
+    const head = new THREE.Mesh(
+      
